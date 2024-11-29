@@ -1,0 +1,113 @@
+PATH;LINE;SMELL;TIME
+ansible-role-container-registry-tasks-docker-distribution.yml;0;none;3.68382978439331
+ansible-role-container-registry-vars-main.yml;0;none;2.4012291431427
+ansible-role-systemd_mount-ansible-role-requirements.yaml;0;none;3.1158947944641113
+ansible-role-systemd_mount-tasks-systemd_mounts.yml;0;none;4.224830865859985
+ansible-role-systemd_mount-tests-group_vars-all_containers.yml;0;none;4.172118186950684
+ansible-role-systemd_mount-vars-main.yml;0;none;2.8516299724578857
+ansible-role-systemd_networkd-zuul.d-project.yaml;0;none;2.9524948596954346
+ansible-role-tripleo-modify-image-tasks-modify_image.yml;35;Suspicious comment;3.6976540088653564
+bifrost-playbooks-install.yaml;0;none;3.9075429439544678
+bifrost-playbooks-roles-bifrost-ironic-install-defaults-required_defaults_Fedora_26.yml;0;none;8.690287113189697
+bifrost-playbooks-roles-bifrost-ironic-install-defaults-required_defaults_Ubuntu_15.04.yml;0;none;2.967823028564453
+bifrost-playbooks-roles-bifrost-keystone-client-config-defaults-main.yml;0;none;2.7058181762695312
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml;15;Admin by default;4.244836807250977
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml;47;Admin by default;4.244836807250977
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml;16;Empty password;4.244836807250977
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml;47;Hard-coded secret;4.244836807250977
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml;48;Hard-coded secret;4.244836807250977
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml;55;Hard-coded secret;4.244836807250977
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml;56;Hard-coded secret;4.244836807250977
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml;61;Hard-coded secret;4.244836807250977
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml;62;Hard-coded secret;4.244836807250977
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-required_defaults_Debian_jessie.yml;0;none;6.479747772216797
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-required_defaults_Fedora_22.yml;0;none;3.218864917755127
+bifrost-playbooks-roles-bifrost-test-dhcp-defaults-main.yml;0;none;2.623483896255493
+bifrost-playbooks-roles-bifrost-test-inspection-handlers-main.yml;0;none;2.1759421825408936
+bifrost-playbooks-roles-bifrost-test-vm-handlers-main.yml;0;none;3.4682488441467285
+bifrost-playbooks-roles-bifrost-unprovision-node-dynamic-tasks-main.yml;0;none;5.44310188293457
+browbeat-ansible-browbeat-roles-gnocchi-config-tasks-main.yml;11;Suspicious comment;3.3415050506591797
+browbeat-ansible-browbeat-roles-keystone-token-tasks-main.yml;0;none;8.078166007995605
+browbeat-ansible-browbeat-roles-nova-db-tasks-main.yml;0;none;3.091465950012207
+browbeat-ansible-check-roles-controller-tasks-main.yml;0;none;4.906044960021973
+browbeat-ansible-gather-roles-rabbitmq-tasks-main.yml;0;none;3.3575031757354736
+browbeat-ansible-gather-roles-undercloud-tasks-main.yml;0;none;3.565640926361084
+browbeat-ansible-install-roles-common-tasks-main.yml;0;none;3.340620994567871
+browbeat-ansible-install-roles-epel-defaults-main.yml;0;none;2.7971980571746826
+browbeat-ansible-install-roles-fluentd-tasks-main.yml;0;none;5.60930609703064
+browbeat-ansible-install-roles-grafana-dashboards-files-cloud_instance_count.yaml;0;none;2.9219419956207275
+browbeat-ansible-install-roles-grafana-dashboards-templates-partials-ironic_metrics.yaml;0;none;2.9018471240997314
+browbeat-ansible-install-roles-grafana-dashboards-templates-partials-processes.yaml;0;none;7.923984050750732
+browbeat-ansible-install-roles-kibana-visualization-vars-keystone_controller_count_visualizations.yml;0;none;9.137624979019165
+networking-ovn-migration-tripleo_environment-playbooks-ovn-migration.yml;0;none;2.5867841243743896
+openstack-ansible-inventory-env.d-blazar.yml;0;none;4.8095481395721436
+openstack-ansible-inventory-env.d-cinder.yml;0;none;7.305901765823364
+openstack-ansible-inventory-env.d-designate.yml;0;none;9.064652919769287
+openstack-ansible-inventory-env.d-neutron.yml;0;none;4.551375150680542
+openstack-ansible-inventory-env.d-rsyslog.yml;0;none;2.4852118492126465
+openstack-ansible-inventory-group_vars-ceilometer_all.yml;0;none;9.65935492515564
+openstack-ansible-inventory-group_vars-ceph-rgw.yml;0;none;3.7027437686920166
+openstack-ansible-inventory-group_vars-designate_all.yml;0;none;11.474263191223145
+openstack-ansible-inventory-group_vars-trove_all.yml;0;none;5.707606077194214
+openstack-ansible-inventory-group_vars-utility_all.yml;0;none;9.695047855377197
+openstack-ansible-ops-elk_metrics_6x-roles-elastic_data_hosts-meta-main.yml;0;none;3.43111515045166
+openstack-ansible-ops-elk_metrics_6x-roles-elastic_filebeat-tasks-main.yml;0;none;3.7605392932891846
+openstack-ansible-ops-elk_metrics_6x-roles-elastic_heartbeat-handlers-main.yml;0;none;2.849412202835083
+openstack-ansible-ops-elk_metrics_6x-roles-elastic_journalbeat-vars-redhat.yml;0;none;4.382251977920532
+openstack-ansible-ops-elk_metrics_6x-roles-elastic_kibana-meta-main.yml;0;none;3.662688970565796
+openstack-ansible-ops-elk_metrics_6x-roles-elastic_logstash-tasks-logstash_arcsight.yml;0;none;4.815908193588257
+openstack-ansible-ops-elk_metrics_6x-roles-elastic_rollup-defaults-main.yml;0;none;3.2116899490356445
+openstack-ansible-ops-elk_metrics_6x-roles-elasticsearch-meta-main.yml;0;none;4.898203134536743
+openstack-ansible-ops-elk_metrics_6x-roles-go_install_1.10-tasks-main.yml;0;none;3.3933329582214355
+openstack-ansible-ops-elk_metrics_6x-tests-ansible-role-requirements.yml;0;none;6.994120836257935
+openstack-ansible-ops-leap-upgrades-upgrade-utilities-mitaka-playbooks-deploy-config-changes-mitaka.yml;20;Admin by default;3.9407479763031
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;18;Unrestricted IP Address;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;24;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;28;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;32;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;53;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;54;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;57;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;60;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;68;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;69;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;72;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;75;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;83;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;84;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;87;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;90;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;96;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;97;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;98;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;102;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml;105;Use of HTTP without SSL/TLS;4.869905233383179
+openstack-ansible-ops-multi-node-aio-playbooks-host_vars-ceph1.yml;0;none;6.765086889266968
+openstack-ansible-ops-multi-node-aio-playbooks-host_vars-compute2.yml;0;none;4.125051975250244
+openstack-ansible-ops-pxelinux-provisioning-playbooks-deploy-dhcp.yml;0;none;6.731213808059692
+openstack-ansible-playbooks-common-tasks-os-lxc-container-setup.yml;98;Suspicious comment;7.3246238231658936
+openstack-ansible-playbooks-common-tasks-os-lxc-container-setup.yml;121;Suspicious comment;7.3246238231658936
+openstack-ansible-playbooks-healthcheck-hosts.yml;20;Suspicious comment;6.501968145370483
+openstack-ansible-playbooks-healthcheck-hosts.yml;23;Suspicious comment;6.501968145370483
+openstack-ansible-playbooks-healthcheck-hosts.yml;53;No integrity check;6.501968145370483
+openstack-ansible-playbooks-lxc-containers-destroy.yml;33;Admin by default;2.8082590103149414
+openstack-ansible-playbooks-os-designate-install.yml;22;Admin by default;4.274898290634155
+openstack-ansible-playbooks-os-tempest-install.yml;19;Admin by default;2.3716840744018555
+openstack-ansible-playbooks-utility-install.yml;18;Admin by default;6.544872999191284
+openstack-ansible-tests-roles-bootstrap-host-defaults-main.yml;200;Unrestricted IP Address;4.719967842102051
+openstack-ansible-tests-roles-bootstrap-host-tasks-check-requirements.yml;0;none;6.884643077850342
+openstack-ansible-tests-roles-bootstrap-host-tasks-prepare_loopback_machines.yml;0;none;3.2708747386932373
+openstack-ansible-tests-roles-bootstrap-host-tasks-prepare_loopback_zfs.yml;0;none;3.664872169494629
+puppet-openstack-integration-playbooks-prepare-node-unit.yaml;0;none;3.889059066772461
+puppet-openstack-integration-playbooks-run-syntax-tests.yaml;0;none;2.8948211669921875
+tripleo-quickstart-playbooks-libvirt-teardown.yml;0;none;3.23781394958496
+tripleo-quickstart-roles-environment-vars-main.yml;0;none;2.229572057723999
+tripleo-quickstart-roles-libvirt-setup-meta-main.yml;0;none;5.9301652908325195
+tripleo-quickstart-roles-libvirt-setup-overcloud-tasks-vars-libvirt_nodepool_vars.yml;0;none;3.2522380352020264
+tripleo-quickstart-roles-libvirt-setup-undercloud-tasks-inject_repos.yml;0;none;3.337722063064575
+tripleo-quickstart-roles-libvirt-setup-user-meta-main.yml;0;none;3.018707275390625
+tripleo-quickstart-roles-parts-kvm-tasks-main.yml;0;none;2.7264530658721924
+tripleo-quickstart-roles-virtbmc-defaults-main.yml;0;none;2.501997947692871
+windmill-playbooks-bootstrap.yaml;0;none;6.817851781845093
+windmill-playbooks-zookeeper.yaml;0;none;4.341772079467773
+windmill-playbooks-zuul-fingergw.yaml;0;none;3.821420907974243

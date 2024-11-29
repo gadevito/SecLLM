@@ -1,0 +1,154 @@
+PATH;LINE;SMELL;TIME
+aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb;75;Admin by default;6.821013927459717
+aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb;101;Admin by default;6.821013927459717
+aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb;93;Suspicious comment;6.821013927459717
+aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb;112;Suspicious comment;6.821013927459717
+aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb;117;Missing Default in Case Statement;6.821013927459717
+AYCHIT_Asf-chef-cookbooks-rsnapshot-resources-script.rb;0;none;2.542623996734619
+binary-com_chef-third-party-cookbooks-cron-attributes-default.rb;0;none;4.503249168395996
+binary-com_chef-third-party-cookbooks-datadog-recipes-network.rb;0;none;5.525425910949707
+binary-com_chef-third-party-cookbooks-datadog-recipes-openmetrics.rb;0;none;3.40844988822937
+binary-com_chef-third-party-cookbooks-poise-files-halite_gem-poise-subcontext-resource_collection.rb;0;none;4.27932071685791
+chef_mixlib-install-acceptance-windows-server-2012r2-fips-.acceptance-acceptance-cookbook-recipes-verify.rb;9;Admin by default;4.6204328536987305
+chef_mixlib-install-acceptance-windows-server-2012r2-fips-.acceptance-acceptance-cookbook-recipes-verify.rb;12;Hard-coded secret;4.6204328536987305
+chef-boneyard_qa-chef-server-cluster-attributes-default.rb;3;Hard-coded secret;5.506577014923096
+cookbooks_hw-nginx-recipes-commons_dir.rb;0;none;5.484302759170532
+cookbooks_ic-cloud_utils-cookbooks-hadoop_cluster-recipes-default.rb;0;none;3.2580509185791016
+cookbooks_ic-cloud_utils-cookbooks-redis-recipes-install_from_package.rb;0;none;3.655522108078003
+cookbooks_ic-elasticsearch-cookbooks-install_from-definitions-osx_application.rb;0;none;3.5277302265167236
+cookbooks_ic-ganglia-cookbooks-elasticsearch-recipes-plugins.rb;30;Admin by default;5.628069162368774
+cookbooks_ic-ganglia-cookbooks-hadoop_cluster-example-clusters-science.rb;0;none;6.043384790420532
+cookbooks_ic-hadoop_cluster-cookbooks-hbase-recipes-stargate.rb;0;none;6.522112131118774
+cookbooks_ic-hadoop_cluster-cookbooks-zabbix-recipes-database_mysql.rb;25;Admin by default;6.643178939819336
+cookbooks_ic-hadoop_cluster-cookbooks-zabbix-recipes-database_mysql.rb;26;Admin by default;6.643178939819336
+cookbooks_ic-hadoop_cluster-cookbooks-zabbix-recipes-database_mysql.rb;47;Admin by default;6.643178939819336
+cookbooks_ic-hadoop_cluster-cookbooks-zabbix-recipes-database_mysql.rb;135;Admin by default;6.643178939819336
+cookbooks_ic-hadoop_cluster-roles-cassandra_client.rb;0;none;2.4367079734802246
+cookbooks_ic-jenkins-cookbooks-zabbix-recipes-agent.rb;0;none;6.561016082763672
+cookbooks_ic-jenkins-cookbooks-zabbix-recipes-database_mysql.rb;25;Admin by default;5.278141975402832
+cookbooks_ic-jenkins-cookbooks-zabbix-recipes-database_mysql.rb;26;Admin by default;5.278141975402832
+cookbooks_ic-jenkins-cookbooks-zabbix-recipes-database_mysql.rb;47;Admin by default;5.278141975402832
+cookbooks_ic-jenkins-cookbooks-zabbix-recipes-database_mysql.rb;129;Use of weak cryptography algorithms;5.278141975402832
+cookbooks_ic-motd-roles-elasticsearch_datanode.rb;0;none;1.9689610004425049
+cookbooks_ic-nodejs-cookbooks-hbase-recipes-config_files.rb;49;Suspicious comment;3.0576388835906982
+cookbooks_ic-package_set-cookbooks-rvm-providers-global_gem.rb;91;Admin by default;4.2201759815216064
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb;34;Admin by default;8.381887912750244
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb;35;Empty password;8.381887912750244
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb;37;Empty password;8.381887912750244
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb;51;Hard-coded secret;8.381887912750244
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb;52;Hard-coded secret;8.381887912750244
+cookbooks_ic-snappy-roles-statsd_server.rb;0;none;2.5542922019958496
+cookbooks_ic-tuning-cookbooks-ganglia-recipes-default.rb;0;none;5.23037576675415
+cookbooks_ic-tuning-cookbooks-zabbix-libraries-zabbix_hosts_and_templates.rb;11;Missing Default in Case Statement;4.991326808929443
+cookbooks_ic-tuning-cookbooks-zabbix-libraries-zabbix_hosts_and_templates.rb;28;Missing Default in Case Statement;4.991326808929443
+cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb;19;Unrestricted IP Address;2.8945579528808594
+cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb;20;Unrestricted IP Address;2.8945579528808594
+cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb;21;Unrestricted IP Address;2.8945579528808594
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb;35;Empty password;3.9382500648498535
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb;29;Unrestricted IP Address;3.9382500648498535
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb;20;Suspicious comment;3.9382500648498535
+cookbooks_ic-volumes_ebs-cookbooks-resque-attributes-default.rb;24;Unrestricted IP Address;4.347718238830566
+cookbooks_ic-volumes_ebs-cookbooks-zabbix-resources-user.rb;0;none;2.9114670753479004
+cookbooks_ic-volumes-cookbooks-silverware-libraries-dump_aspects.rb;0;none;4.879946947097778
+cookbooks_ic-volumes-cookbooks-strongswan-recipes-routing.rb;22;Suspicious comment;2.6388683319091797
+cookbooks_ic-zabbix-cookbooks-zabbix-providers-host.rb;28;Unrestricted IP Address;6.158390998840332
+cookbooks_ic-zabbix-cookbooks-zabbix-providers-host.rb;50;Unrestricted IP Address;6.158390998840332
+danielladd_Chef-Testing-cookbooks-mysql-attributes-server_rhel.rb;1;Missing Default in Case Statement;4.87125301361084
+danielladd_Chef-Testing-cookbooks-mysql-attributes-server_rhel.rb;10;Missing Default in Case Statement;4.87125301361084
+davestarling_chef-features-data-cookbooks-manage_files-recipes-default.rb;0;none;5.521804094314575
+desirit_chef-bach-cookbooks-bcpc-hadoop-recipes-oozie.rb;142;Admin by default;4.588566064834595
+desirit_chef-bach-cookbooks-bcpc-hadoop-recipes-oozie.rb;152;Admin by default;4.588566064834595
+desirit_chef-bach-cookbooks-bcpc-hadoop-recipes-oozie.rb;148;Empty password;4.588566064834595
+desirit_chef-bach-cookbooks-bcpc-hadoop-recipes-oozie.rb;149;Empty password;4.588566064834595
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb;130;Admin by default;6.381598949432373
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb;153;Admin by default;6.381598949432373
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb;160;Admin by default;6.381598949432373
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb;161;Admin by default;6.381598949432373
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb;162;Admin by default;6.381598949432373
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb;163;Admin by default;6.381598949432373
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb;174;Admin by default;6.381598949432373
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb;184;Admin by default;6.381598949432373
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb;424;Missing Default in Case Statement;6.381598949432373
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb;22;Admin by default;7.462390184402466
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb;42;Admin by default;7.462390184402466
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb;50;Admin by default;7.462390184402466
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb;126;Admin by default;7.462390184402466
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb;22;Hard-coded secret;7.462390184402466
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb;24;Hard-coded secret;7.462390184402466
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb;26;Hard-coded secret;7.462390184402466
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb;42;Hard-coded secret;7.462390184402466
+EEDARIT_opsworks-cookbooks-iis-resources-root.rb;0;none;7.393999099731445
+EEDARIT_opsworks-cookbooks-windows-providers-feature_powershell.rb;0;none;3.250225782394409
+guymatz_chef-cookbooks-cutlery-libraries-notifying_action.rb;0;none;2.348748207092285
+guymatz_chef-cookbooks-hive-attributes-default.rb;11;Use of HTTP without SSL/TLS;4.140671968460083
+guymatz_chef-cookbooks-hive-attributes-default.rb;3;Missing Default in Case Statement;4.140671968460083
+guymatz_chef-cookbooks-mysql-attributes-client.rb;0;none;7.33488917350769
+guymatz_chef-cookbooks-nagios-recipes-server_package.rb;0;none;7.968239784240723
+guymatz_chef-cookbooks-psql-resources-user.rb;20;Empty password;2.904676914215088
+guymatz_chef-cookbooks-psql-resources-user.rb;23;Empty password;2.904676914215088
+guymatz_chef-cookbooks-python-attributes-default.rb;36;Use of HTTP without SSL/TLS;4.08927583694458
+gwalbran_chef-cookbooks-imos_backup-attributes-restore.rb;0;none;3.0698819160461426
+gwalbran_chef-cookbooks-imos_webapps-definitions-ncwms.rb;0;none;5.269761085510254
+havk64_chef-zero-playground-cookbooks-nginx-attributes-socketproxy.rb;0;none;6.931118965148926
+havk64_chef-zero-playground-cookbooks-runit-recipes-default.rb;29;Missing Default in Case Statement;9.391865968704224
+infochimps-labs_ironfan-pantry-cookbooks-iptables-recipes-default.rb;39;Missing Default in Case Statement;7.74353289604187
+infochimps-labs_ironfan-pantry-cookbooks-nodejs-recipes-install_from_binary.rb;0;none;7.98905086517334
+infochimps-labs_ironfan-pantry-cookbooks-python-attributes-default.rb;36;Use of HTTP without SSL/TLS;2.8977339267730713
+infochimps-labs_ironfan-pantry-cookbooks-sudo-recipes-default.rb;0;none;3.946500778198242
+infochimps-labs_ironfan-pantry-cookbooks-windows-providers-batch.rb;0;none;4.630401134490967
+infochimps-labs_ironfan-pantry-cookbooks-zabbix-providers-media_type.rb;0;none;3.978785991668701
+infochimps-labs_ironfan-pantry-cookbooks-zsh-recipes-default.rb;24;Missing Default in Case Statement;3.738490104675293
+johnfitzpatrick_ChefTraining-cookbooks-apache-recipes-user01_index.rb;0;none;2.675433874130249
+jonmthomson_cookbooks-mingw-recipes-default.rb;14;Hard-coded secret;6.643193960189819
+kitchenplan_chef-applications-recipes-omnigraffle.rb;15;No integrity check;8.6666100025177
+kitchenplan_chef-applications-recipes-omnigraffle.rb;40;No integrity check;8.6666100025177
+kitchenplan_chef-applications-recipes-omnigraffle.rb;65;No integrity check;8.6666100025177
+kitchenplan_chef-applications-recipes-omnigraffle.rb;1;Missing Default in Case Statement;8.6666100025177
+kitchenplan_chef-applications-recipes-omnigraffle.rb;80;Missing Default in Case Statement;8.6666100025177
+kitchenware_master-chef-cookbooks-base-recipes-editor.rb;5;Admin by default;3.353996753692627
+michaelklishin_cassandra-chef-cookbook-recipes-opscenter_agent.rb;0;none;7.969662189483643
+newrelic_infrastructure-agent-chef-recipes-default.rb;0;none;4.683444023132324
+Nikhil424_chef-repo-cookbooks-jdk-recipes-default.rb;11;Admin by default;6.288522958755493
+Nikhil424_chef-repo-cookbooks-jdk-recipes-default.rb;15;Admin by default;6.288522958755493
+Nikhil424_chef-repo-cookbooks-windows-resources-pagefile.rb;0;none;7.860656976699829
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb;14;Use of HTTP without SSL/TLS;5.96124505996704
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb;16;Use of HTTP without SSL/TLS;5.96124505996704
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb;18;Use of HTTP without SSL/TLS;5.96124505996704
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb;20;Use of HTTP without SSL/TLS;5.96124505996704
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb;26;Use of HTTP without SSL/TLS;5.96124505996704
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb;28;Use of HTTP without SSL/TLS;5.96124505996704
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb;30;Use of HTTP without SSL/TLS;5.96124505996704
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb;33;Use of HTTP without SSL/TLS;5.96124505996704
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb;36;Use of HTTP without SSL/TLS;5.96124505996704
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb;10;Missing Default in Case Statement;5.96124505996704
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb;12;Missing Default in Case Statement;5.96124505996704
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb;23;Missing Default in Case Statement;5.96124505996704
+openstreetmap_chef-cookbooks-accounts-recipes-default.rb;35;Missing Default in Case Statement;5.491495132446289
+openstreetmap_chef-cookbooks-civicrm-recipes-default.rb;162;Use of HTTP without SSL/TLS;5.912298917770386
+openstreetmap_chef-cookbooks-civicrm-recipes-default.rb;81;No integrity check;5.912298917770386
+openstreetmap_chef-cookbooks-civicrm-recipes-default.rb;90;No integrity check;5.912298917770386
+openstreetmap_chef-cookbooks-networking-libraries-ipaddresses.rb;0;none;2.1805410385131836
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb;26;Admin by default;6.890391111373901
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb;88;Admin by default;6.890391111373901
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb;96;Admin by default;6.890391111373901
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb;134;Admin by default;6.890391111373901
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb;146;Admin by default;6.890391111373901
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb;173;Admin by default;6.890391111373901
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb;26;Hard-coded secret;6.890391111373901
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb;41;Hard-coded secret;6.890391111373901
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb;63;Hard-coded secret;6.890391111373901
+rcbops-cookbooks_keystone-recipes-default.rb;0;none;8.060317039489746
+sabarisankar27_chef-acceptance-fips-.acceptance-acceptance-cookbook-recipes-destroy.rb;0;none;2.7878458499908447
+sabarisankar27_chef-acceptance-top-cookbooks-.acceptance-acceptance-cookbook-recipes-provision.rb;0;none;2.6687958240509033
+scmgalaxy_chef-training-programs-recipes-raviteja-chef-repo-E4.rb;3;Use of HTTP without SSL/TLS;6.37440013885498
+scmgalaxy_chef-training-programs-recipes-raviteja-chef-repo-E4.rb;3;No integrity check;6.37440013885498
+scmgalaxy_chef-training-programs-uma-chef-repo-cookbooks-Application-.delivery-build_cookbook-recipes-provision.rb;0;none;4.350647687911987
+Soluciones_ey-cloud-recipes-cookbooks-solr-attributes-solr.rb;0;none;5.759852886199951
+sous-chefs_nrpe-recipes-default.rb;0;none;2.8509252071380615
+sous-chefs_php-recipes-package.rb;0;none;3.34912371635437
+TaxiOS_zabbix-recipes-server_source.rb;14;Missing Default in Case Statement;5.421869993209839
+TaxiOS_zabbix-recipes-server_source.rb;17;Missing Default in Case Statement;5.421869993209839
+TaxiOS_zabbix-recipes-server_source.rb;32;Missing Default in Case Statement;5.421869993209839
+TaxiOS_zabbix-recipes-server_source.rb;57;Missing Default in Case Statement;5.421869993209839
+thomasmeeus_chef-apache2-recipes-mod_php5.rb;20;Missing Default in Case Statement;6.0362770557403564
+thomasmeeus_chef-apache2-recipes-mod_php5.rb;64;Missing Default in Case Statement;6.0362770557403564

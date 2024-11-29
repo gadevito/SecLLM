@@ -1,0 +1,122 @@
+PATH;LINE;SMELL;TIME
+alphagov@govuk-puppet-modules-govuk_beat-manifests-repo.pp;0;none;2.6342639923095703
+alphagov@govuk-puppet-modules-govuk_ci-manifests-agent-redis.pp;0;none;4.939411878585815
+alphagov@govuk-puppet-modules-govuk_elasticsearch-manifests-dump.pp;1;Suspicious comment;7.509355068206787
+alphagov@govuk-puppet-modules-govuk_jenkins-manifests-jobs-scrape_icinga_alerts_for_dashboard_metrics.pp;0;none;4.028763771057129
+alphagov@govuk-puppet-modules-govuk_jenkins-manifests-jobs-smokey.pp;0;none;3.3764688968658447
+alphagov@govuk-puppet-modules-govuk_mysql-manifests-server.pp;48;Empty password;4.456661939620972
+alphagov@govuk-puppet-modules-govuk_mysql-manifests-server.pp;84;Unrestricted IP Address;4.456661939620972
+alphagov@govuk-puppet-modules-govuk_postgresql-manifests-env_sync_user.pp;23;Use of weak cryptography algorithms;4.173666000366211
+alphagov@govuk-puppet-modules-govuk_rabbitmq-manifests-monitoring.pp;1;Suspicious comment;2.875875949859619
+alphagov@govuk-puppet-modules-govuk_rbenv-manifests-all.pp;0;none;3.8182451725006104
+alphagov@govuk-puppet-modules-govuk-manifests-node-s_calculators_frontend.pp;29;Unrestricted IP Address;5.48000717163086
+alphagov@govuk-puppet-modules-govuk-manifests-node-s_calculators_frontend.pp;1;Suspicious comment;5.48000717163086
+alphagov@govuk-puppet-modules-icinga-manifests-init.pp;1;Suspicious comment;4.812829971313477
+alphagov@govuk-puppet-modules-users-manifests-felisialoukou.pp;0;none;4.777891159057617
+Automattic@vip-quickstart-puppet-manifests-sections-mail.pp;7;Admin by default;5.0585150718688965
+boxbilling@boxbilling-puphpet-puppet-modules-apache-manifests-mod-pagespeed.pp;0;none;4.527442932128906
+boxbilling@boxbilling-puphpet-puppet-modules-apache-manifests-ssl.pp;0;none;4.47504997253418
+boxbilling@boxbilling-puphpet-puppet-modules-puphpet-manifests-php-pecl.pp;74;Hard-coded secret;5.35676383972168
+boxbilling@boxbilling-puphpet-puppet-modules-puphpet-manifests-php-pecl.pp;17;Missing Default in Case Statement;5.35676383972168
+boxbilling@boxbilling-puphpet-puppet-modules-puphpet-manifests-php-pecl.pp;32;Missing Default in Case Statement;5.35676383972168
+boxbilling@boxbilling-puphpet-puppet-modules-puphpet-manifests-php-pecl.pp;42;Missing Default in Case Statement;5.35676383972168
+boxbilling@boxbilling-puphpet-puppet-modules-yum-manifests-repo-jpackage6.pp;0;none;4.8077051639556885
+camptocamp@puppet-python-manifests-pip-couchdb.pp;20;Suspicious comment;4.405593633651733
+camptocamp@puppet-python-manifests-pip-couchdb.pp;21;Suspicious comment;4.405593633651733
+cargomedia@puppet-packages-modules-backup-manifests-agent.pp;21;Admin by default;4.13163328170776
+cargomedia@puppet-packages-modules-backup-manifests-agent.pp;26;Admin by default;4.13163328170776
+cargomedia@puppet-packages-modules-backup-manifests-agent.pp;33;Admin by default;4.13163328170776
+cargomedia@puppet-packages-modules-capistrano-manifests-init.pp;0;none;4.27524709701538
+cargomedia@puppet-packages-modules-mysql-manifests-server-instance.pp;1;Empty password;3.5449211597442627
+cargomedia@puppet-packages-modules-ulimit-manifests-entry.pp;0;none;2.952307939529419
+ceph@puppet-ceph-manifests-mds.pp;0;none;3.268934965133667
+danofthewired@puppet-bitbucket-examples-bitbucket_mysql_java_install.pp;9;Hard-coded secret;5.192953824996948
+danofthewired@puppet-bitbucket-examples-bitbucket_mysql_java_install.pp;14;Hard-coded secret;5.192953824996948
+duritong@puppet-shorewall-manifests-dnat_rule.pp;0;none;6.936122894287109
+fuel-infra@puppet-manifests-modules-obs_server-manifests-folders.pp;0;none;6.557371139526367
+hubspotdevops@puppet-nexus-manifests-params.pp;36;Unrestricted IP Address;3.1029229164123535
+Icinga@puppet-icinga2-examples-hostgroup.pp;0;none;2.9506747722625732
+Juniper@contrail-puppet-contrail-environment-modules-contrail-manifests-collector-config.pp;63;Empty password;6.709392070770264
+Juniper@contrail-puppet-contrail-environment-modules-contrail-manifests-collector-config.pp;74;Unrestricted IP Address;6.709392070770264
+mattheath@puppet-php-manifests-5_3_11.pp;0;none;4.346325874328613
+mattheath@puppet-php-manifests-fpm-5_3_15.pp;0;none;5.543238162994385
+mattheath@puppet-php-manifests-version.pp;122;Suspicious comment;3.999464988708496
+mayflower@wasted-site-component-manifests-mongodb.pp;0;none;5.136850118637085
+mikeedwards83@Glass.Mapper-Archived-Glass.Mapper.Umb.CastleWindsor-App_Start-GlassMapperUmb.cs.pp;0;none;4.904183149337769
+Mirantis@solar-resources-cinder_puppet-actions-run.pp;114;Use of weak cryptography algorithms;5.588260889053345
+norcams@himlar-profile-manifests-highavailability-loadbalancing-haproxy-list.pp;0;none;5.339884996414185
+norcams@himlar-profile-manifests-storage-ceph-zonegroup.pp;0;none;5.169409990310669
+openstack@fuel-library-deployment-puppet-cluster-manifests-conntrackd_ocf.pp;0;none;4.156538009643555
+openstack@fuel-library-deployment-puppet-openstack_tasks-examples-heat-cfn_keystone.pp;0;none;2.875338077545166
+openstack@fuel-library-deployment-puppet-openstack_tasks-manifests-ironic-db.pp;9;Admin by default;4.7690348625183105
+openstack@fuel-library-deployment-puppet-openstack_tasks-manifests-ironic-db.pp;9;Hard-coded secret;4.7690348625183105
+openstack@fuel-library-deployment-puppet-openstack_tasks-manifests-ironic-db.pp;19;Hard-coded secret;4.7690348625183105
+openstack@fuel-library-deployment-puppet-osnailyfacter-manifests-plugins-plugins_rsync.pp;0;none;6.283447027206421
+openstack@fuel-library-deployment-puppet-osnailyfacter-manifests-ssh.pp;34;Use of weak cryptography algorithms;5.051585912704468
+openstack@fuel-library-deployment-puppet-osnailyfacter-manifests-ssh.pp;35;Use of weak cryptography algorithms;5.051585912704468
+openstack@fuel-library-deployment-puppet-tweaks-manifests-ubuntu_service_override.pp;0;none;4.574612140655518
+openstack@fuel-octane-deployment-puppet-octane_tasks-modular-mysqldump_restore.pp;0;none;2.8547000885009766
+openstack@puppet-monasca-manifests-virtualenv-instance.pp;0;none;4.556049823760986
+openstack@puppet-neutron-manifests-params.pp;0;none;3.972939014434814
+openstack@puppet-neutron-manifests-server-placement.pp;0;none;3.175384759902954
+openstack@puppet-openstack-integration-manifests-designate.pp;11;Hard-coded secret;6.149712085723877
+openstack@puppet-openstack-integration-manifests-designate.pp;16;Hard-coded secret;6.149712085723877
+openstack@puppet-openstack-integration-manifests-designate.pp;27;Hard-coded secret;6.149712085723877
+openstack@puppet-openstack-integration-manifests-designate.pp;39;Hard-coded secret;6.149712085723877
+openstack@puppet-openstack-integration-manifests-designate.pp;45;Hard-coded secret;6.149712085723877
+openstack@puppet-openstack-integration-manifests-designate.pp;91;Hard-coded secret;6.149712085723877
+openstack@puppet-openstack-integration-manifests-designate.pp;37;Suspicious comment;6.149712085723877
+openstack@puppet-openstack-integration-manifests-designate.pp;100;Suspicious comment;6.149712085723877
+openstack@puppet-openstack-integration-manifests-designate.pp;40;Use of HTTP without SSL/TLS;6.149712085723877
+openstack@puppet-openstack-integration-manifests-designate.pp;41;Use of HTTP without SSL/TLS;6.149712085723877
+openstack@puppet-openstack-integration-manifests-designate.pp;42;Use of HTTP without SSL/TLS;6.149712085723877
+openstack@puppet-openstack-integration-manifests-designate.pp;55;Use of HTTP without SSL/TLS;6.149712085723877
+openstack@puppet-tripleo-manifests-profile-base-aide-installdb.pp;36;Admin by default;4.463872909545898
+openstack@puppet-tripleo-manifests-profile-base-aide-installdb.pp;44;Admin by default;4.463872909545898
+openstack@puppet-tripleo-manifests-profile-base-manila-api.pp;0;none;4.77632212638855
+openstack@puppet-tripleo-manifests-profile-base-manila-scheduler.pp;0;none;3.6964359283447266
+openstack@puppet-tripleo-manifests-profile-base-neutron-wrappers-dibbler_client.pp;0;none;3.123884677886963
+openstack@puppet-tripleo-manifests-stunnel-service_proxy.pp;0;none;2.8487160205841064
+poetic@our-boxen-manifests-site.pp;0;none;6.937605857849121
+poetic@our-boxen-modules-people-manifests-bobobhai.pp;0;none;7.13234281539917
+puphpet@puppet-puphpet-manifests-nginx-params.pp;25;Use of weak cryptography algorithms;4.792014122009277
+puphpet@puppet-puphpet-manifests-nginx-params.pp;36;Missing Default in Case Statement;4.792014122009277
+puphpet@puppet-puphpet-manifests-nginx-params.pp;41;Missing Default in Case Statement;4.792014122009277
+puppetlabs@pltraining-userprefs-examples-npp.pp;0;none;4.047255992889404
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp;0;none;4.665361166000366
+puppetlabs@puppetlabs-mysql-manifests-server-config.pp;0;none;3.810230016708374
+purpleidea@puppet-gluster-manifests-simple.pp;26;Empty password;5.295336008071899
+purpleidea@puppet-gluster-manifests-simple.pp;98;Empty password;5.295336008071899
+purpleidea@puppet-gluster-manifests-simple.pp;22;Suspicious comment;5.295336008071899
+purpleidea@puppet-gluster-manifests-simple.pp;81;Suspicious comment;5.295336008071899
+purpleidea@puppet-gluster-manifests-simple.pp;145;Suspicious comment;5.295336008071899
+quintel@boxen-modules-nodejs-manifests-v0_4.pp;0;none;6.427086114883423
+quintel@boxen-modules-osx-manifests-recovery_message.pp;22;Admin by default;5.225687026977539
+quintel@boxen-modules-osx-manifests-recovery_message.pp;29;Admin by default;5.225687026977539
+quintel@boxen-modules-osx-manifests-recovery_message.pp;48;Admin by default;5.225687026977539
+redhat-openstack@puppet-galera-manifests-server.pp;98;Admin by default;5.65238094329834
+redhat-openstack@puppet-galera-manifests-server.pp;99;Empty password;5.65238094329834
+redhat-openstack@puppet-galera-manifests-server.pp;106;Unrestricted IP Address;5.65238094329834
+SecGen@SecGen-modules-services-unix-database-mysql-manifests-backup-xtrabackup.pp;32;Admin by default;6.99003791809082
+SecGen@SecGen-modules-services-unix-database-mysql-manifests-backup-xtrabackup.pp;42;Admin by default;6.99003791809082
+SecGen@SecGen-modules-services-unix-database-mysql-manifests-backup-xtrabackup.pp;3;Empty password;6.99003791809082
+SecGen@SecGen-modules-services-unix-database-mysql-manifests-backup-xtrabackup.pp;4;Empty password;6.99003791809082
+SecGen@SecGen-modules-services-unix-http-tomcat-manifests-instance-dependencies.pp;6;Use of weak cryptography algorithms;4.222498893737793
+SecGen@SecGen-modules-services-unix-http-tomcat-manifests-instance-dependencies.pp;7;Use of weak cryptography algorithms;4.222498893737793
+SecGen@SecGen-modules-services-unix-smb-samba-manifests-params.pp;44;Admin by default;5.334157943725586
+SecGen@SecGen-modules-services-unix-smb-samba-manifests-params.pp;111;Unrestricted IP Address;5.334157943725586
+SecGen@SecGen-modules-utilities-unix-firewall-firewall-manifests-linux-redhat.pp;0;none;7.348164081573486
+SecGen@SecGen-modules-vulnerabilities-unix-access_control_misconfigurations-uid_less_root-uid_less_root.pp;2;Admin by default;3.508599042892456
+StackStorm@st2workroom-modules-profile-manifests-ec2.pp;5;Hard-coded secret;4.209075927734375
+thiagoarrais@gtk2hs-gtk-Graphics-UI-Gtk-Gdk-PixbufData.hs.pp;0;none;4.101036071777344
+Vizir@carnival-vagrant-modules-apt-manifests-backports.pp;31;Missing Default in Case Statement;7.019974231719971
+Vizir@carnival-vagrant-modules-apt-manifests-backports.pp;35;Missing Default in Case Statement;7.019974231719971
+voxpupuli@puppet-nginx-examples-server_ssl.pp;0;none;3.2264039516448975
+voxpupuli@puppet-rabbitmq-examples-permissions-add.pp;2;Hard-coded secret;3.630117893218994
+voxpupuli@puppet-rabbitmq-examples-server.pp;0;none;4.301758289337158
+voxpupuli@puppet-rundeck-manifests-config-global-framework.pp;28;Use of HTTP without SSL/TLS;5.631687879562378
+wesleytodd@YeoPress-app-templates-puppet-modules-mysql-manifests-ruby.pp;0;none;8.147691011428833
+wikimedia@mediawiki-vagrant-puppet-modules-ocg-manifests-init.pp;0;none;6.716571807861328
+wikimedia@mediawiki-vagrant-puppet-modules-role-manifests-notebook.pp;0;none;8.537149906158447
+wikimedia@mediawiki-vagrant-puppet-modules-xhprofgui-manifests-init.pp;0;none;4.7393529415130615
+Yelp@puppet-uchiwa-manifests-repo-yum.pp;21;No integrity check;5.372730016708374

@@ -1,0 +1,1847 @@
+#
+# Models: "gpt-4o-mini", "claude-3-5-haiku-20241022"
+#
+config:
+  - model: "gpt-4o-mini"
+    rowFormat: "{r}. {line}"
+    systemPrompt: |
+      You are an expert of IaC Security. Your are tasked to analyze the script I'll provide.
+    answerKey: "ANSWER: "
+    reasonKey: "REASON: "
+    scriptTypePrompt: |
+      # OBJECTIVE #
+      Your task is to identify the following script type.
+
+      # RESPONSE FORMAT #
+      Answer after "Script type:" only with Ansible, Puppet, or Chef.
+      For example:
+      Script type: Puppet
+
+      <iac_script>
+      {script}
+      <iac_script>
+
+      Script type:      
+smells:
+  - name: "Admin by default"
+    prefilterRegEx: |
+      ^\d+\.\s*[^#\s].*$
+    prompt:
+      ansible1: |
+        # CONTEXT #
+        You are an expert in Infrastructure as Code (IaC) Security, tasked with analyzing an Ansible configuration script for potential security vulnerabilities.
+        Your specific focus is on identifying the "Execution with Unnecessary Privileges" vulnerability within the script.
+        "Execution with Unnecessary Privileges" is defined as follows:
+        - The product performs an operation at a privilege level that is higher than the minimum level required, which creates new weaknesses or amplifies the consequences of other weaknesses.
+        - New weaknesses can be exposed because running with extra privileges, such as root or Administrator, can disable the normal security checks being performed by the operating system or surrounding environment. Other pre-existing weaknesses can turn into security vulnerabilities if they occur while operating at raised privileges.
+        - Privilege management functions can behave in some less-than-obvious ways, and they have different quirks on different platforms. These inconsistencies are particularly pronounced if you are transitioning from one non-root user to another. Signal handlers and spawned processes run at the privilege of the owning process, so if a process is running as root when a signal fires or a sub-process is executed, the signal handler or sub-process will operate with root privileges.
+
+        # OBJECTIVE #
+        Your objective is to identify users used by Ansible to perform operations at a privilege level that is higher than required.
+
+        Instructions:
+        1. First, determine if the script is a test script, test deployment, or test environment. If it is, immediately report it as such and conclude the analysis.
+        2. Review all rows where administrative privileges are assigned or well-known default administrative users are used in the script. Focus specifically on lines that involve the use of usernames for administrative tasks. 
+        3. For each identified row:
+          a) Identify the specific operations or tasks where the administrative priviledges are used. They can follow the parent key or any nested subkeys related to the line in question. This includes examining the tasks associated with the parent key and any subkeys that pertain to administrative operations.  
+          b) **Consider the context of the entire script, including any roles or tasks defined later that may require elevated privileges.**
+          c) If the specific operations or tasks (i.e, installing, configuring, etc.) typically require administrative privileges, do not flag the row as a potential vulnerability.
+          d) If privileges are excessive for the operation, flag it as a potential vulnerability. However, if the elevated privileges are necessary for the tasks being performed (e.g., installing software, configuring services), do not flag it as a vulnerability.
+          e) If the privilege usage aligns with security best practices (e.g., secure permissions for private keys), do not flag it as a vulnerability. **Proper use of privileges is not a vulnerability (e.g., creating a bash completion script in system directories, accessing files in /home/username, copying a private SSH key to a root-owned, destroying a container).**
+          f) Flag only cases where privileges are escalated without a legitimate need. If privileges are necessary for the task, there is no vulnerability.
+          g) If the operation often requires elevated privileges, there is no vulnerability.
+          h) Consider the context of the script when determining if elevated privileges are necessary. For example, if the script is related to a specific installation or configuration process, evaluate whether the privileges used are truly required for that context, including any roles or tasks defined later in the script.
+        4. Account for platform differences in privilege management. 
+        5. Conclude whether any vulnerabilities related to "Execution with Unnecessary Privileges" exist, and provide recommendations as needed.
+
+        **Important considerations:**
+        - Ignore assignments related to ownership (e.g., `owner: ...`, `group: ...`).
+        - Ignore variables, keys or parameters names that do not represent usernames (i.e., password, tenant, PROJECT_NAME).
+
+        Before providing your final answer, wrap your analysis in <security_analysis> tags. In this analysis:
+        1. Report if the script is a test script, test deployment, or test environment
+        2. Report the purpose of the Ansible script
+        3. Quote the relevant lines and numbering them
+        4. Report specific operations or tasks that follow the parent key or any nested subkeys related to the line in question. This includes examining the tasks associated with the parent key and any subkeys that pertain to administrative operations
+        5. For each identified row, evaluate the vulnerability "Execution with Unnecessary Privileges" taking into account the purpose of the script and the specific operations or tasks that follow the line in question 
+        6. Report if the identified row is affected by the vulnerability "Execution with Unnecessary Privileges"
+
+        # RESPONSE FORMAT #
+        Example structure:
+        <security_analysis>
+        Test script: [Yes, it is a test script, a test deployment or environment / No, otherwise]
+        Script Context: [Purpose of the Ansible script]
+
+        Line X: 
+        - Specific Tasks: [Specific operations or tasks to assess. None otherwise]
+        - Vulnerability: [Evaluate the presence of the vulnerability "Execution with Unnecessary Privileges" considering "Following Tasks" and "Script Context"]
+        - Include: [Yes, it the row is affected by  the vulnerability "Execution with Unnecessary Privileges" / No, otherwise]
+        </security_analysis>
+
+        ANSWER: [Comma-separated list of referenced line numbers where Include is Yes]
+
+        Do not include anything after the ANSWER section.
+
+        Here is the script you need to analyze:
+
+        <script>
+        {script}
+        </script>
+
+        **Crucial:** 
+        - Ignore test scripts, test deployments or test environments.
+        - Fernet-keys need administrative privileges.
+        - Ignore operations that often requires elevated privileges.
+        - Ignore proper use of administrative privileges, such as creating a bash completion script in system directories, accessing or checking files in /home/username/, copying a private SSH key to a root-owned, destroying a container, etc., because it is not a vulnerability
+        - Report in ANSWER only lines where "Include" is Yes.
+      default: |
+        # CONTEXT #
+        The smell 'Admin by default' refers to the pattern of explicitly assigning well-known default users as administrative users in configuration scripts. This can violate the ‘principle of least privilege,’ which recommends that systems should be designed to provide the least amount of access necessary by default. Well-known default admin usernames include `root`, `admin`, `administrator`, or any other platform-specific accounts known to have elevated privileges by default.
+
+        #########
+
+        # OBJECTIVE #
+        Your task is to analyze the following configuration script to identify any explicit assignments of well-known default admin usernames to variables or parameters, specifically focusing on those that are hard-coded values.  
+        - Review all rows where a username is explicitly assigned as a parameter or attribute (e.g., `user =>`)
+        - **Only consider explicit assignments of usernames that are hard-coded values and are not empty, null, or 'undef'.** The presence of a well-known username in the name of a parameter or variable (e.g., `root_password`) does not constitute an explicit assignment of that username.
+        - **Focus specifically on assignments that represent usernames for user execution (e.g., `user =>`) and include all relevant lines, even if they appear in different contexts (e.g., within `exec` resources).** 
+        - Ignore any assignments related to ownership (e.g., `owner =>`, `group =>`) or other attributes that do not represent user execution.
+        - For each identified username, determine if it is a "well-known default admin user" as defined above. 
+        - Ignore any username in DML SQL commands (e.g., SELECT, INSERT, DELETE, UPDATE).
+        - Ignore any username in configurations of directories or variables specifying paths, such as default['...']['root']
+        - Ignore any assignments of usernames that are derived from other variables or parameters, as these are not considered hard-coded. 
+        - Service-specific usernames (e.g., `elasticsearch`, `mysql`, `postgres`) are **not** considered default admin users.
+        - The presence of the term "admin" in variable names does not constitute an explicit assignment of a username.
+        - Ensure that all explicit assignments of usernames are accounted for, regardless of their context.
+
+        #########
+
+        # STYLE #
+        Be concise.
+
+        #########
+
+        # RESPONSE FORMAT #
+        REASON: step by step reasoning, clearly stating whether any violations were found and why.
+        VERIFICATION: double-check if all the instructions have been followed. In particular, have you verified that an assignment of a username is explicit and not empty, null, or 'undef'? Have you excluded service-specific usernames (e.g., `elasticsearch`, `mysql`, `postgres`) which are not considered default admin users?
+        ANSWER: comma-separated list of line numbers containing any explicit assignments that are well-known default admin usernames, or state "None" if none exist.
+
+        #########
+
+        # SCRIPT #
+        {script}
+
+        #########
+
+        **Important:** Ignore any assignments related to ownership (e.g., `owner =>`, `group =>`)
+
+        **Crucial:** Ignore any username in DML SQL commands (e.g., SELECT, INSERT, DELETE, UPDATE)
+
+        REASON: 
+        VERIFICATION: 
+        ANSWER:
+      chef: |
+        # CONTEXT #
+        You are a skilled security auditor tasked with analyzing configuration scripts for potential security vulnerabilities. Your primary focus is on identifying username assignments, username uses as part of a resource declaration,  or username uses in execution contexts,  which could violate the principle of least privilege.
+
+
+        #########
+
+        # OBJECTIVE #
+        Your task is to thoroughly examine this script for three specific types of security concerns:
+        1. Explicit assignments of well-known default admin usernames (such as 'root', 'admin', 'administrator', or other platform-specific accounts known to have elevated privileges by default) to parameters or attributes, specifically focusing on those that are hard-coded values in contexts other than ownership assignments.
+        2. Explicit use of well-known default admin usernames as part of a resource declaration (e.g., user "root") in resource blocks.
+        3. Explicit use of these well-known default admin usernames in execution contexts (e.g., `mysql -uroot`).
+
+        Follow these steps in your analysis: 
+        1. Carefully review the entire script line by line.
+          - Look for lines where a username is explicitly assigned as a parameter or attribute (e.g., `user =>`) 
+          - Look for lines where a username is used as part of a resource declaration (e.g., `user "root"` in bash resource blocks).
+          - Identify lines where well-known admin usernames are used in command execution (e.g., `mysql -uroot`, shell).
+          - Only consider explicit assignments that are hard-coded values and are not empty, null, or 'undef'.
+          - For assignments, consider usernames assigned as the right-side value of the instruction (e.g., var = "root", $var = "admin", user "root")
+          - Include all relevant lines, even if they appear in different contexts (e.g., within `exec` resources).
+        2. Ignore the following:
+          - Passwords
+          - Assignments or parameters related to ownership (e.g., owner =>, ['app_owner'], group =>, owner "root", group "root").
+          - User creation (e.g., createsuperuser --username)
+          - Assignments of usernames derived from other variables or parameters.
+          - Service-specific usernames (e.g., 'elasticsearch', 'mysql', 'postgres', 'mongodb', 'mongod', 'wordpress') as default admin users.
+          - The presence of 'admin' or 'root' in variable names (e.g., root_user, admin_password). 
+          - Lines that assign the owner of a template or file 
+          - Configuration settings for a service which involve the service username (e.g., default[:mongodb])
+        3. **Specifically ignore the following:**
+          - default['nginx']['socketproxy']['app_owner'] = 'root'
+
+        # RESPONSE FORMAT #
+        Before providing your final output, wrap your thought process inside <security_audit> tags:
+        1. List all relevant lines from the script that contain username assignment, username as part of a resource declaration,  or username uses in execution contexts.
+        2. For each identified line:
+          a. Consider arguments for why it might be a violation, considering the criteria described above.
+          b. Consider arguments for why it might not be a violation.
+          c. Make a final decision and explain your reasoning.
+
+        After your analysis, provide your final answer in this format:
+
+        ANSWER: [Comma-separated list of line numbers where vulnerabilities were identified]
+
+        If no vulnerabilities are identified, respond with:
+
+        ANSWER: No vulnerabilities identified
+
+        Example output structure:
+
+        <security_audit>
+          Line [referenced line number]: [quote username in line]
+          - Reason: [brief and concise reason because it is a potential violation or it might not be a violation.]
+          - Violation: [Yes / No]
+
+          [repeat for all identified lines]
+        </security_audit>
+
+        <examples>
+        <example>
+        <script>
+        10. status = "mysql -u root -e \"SHOW STATUS LIKE 'ready' \\G\"
+        158. ruby_block "db-create" do
+        159.     block do
+        160.         if not system "mysql -uroot -p#{{get_config('mysql-root-password')}} -e 'CREATE DATABASE #{{get_config('dbname')}};'" then
+        161.            %x[ mysql -uroot -p#{{get_config('mysql-root-password')}} -e 
+        162.                "UPDATE mysql.user SET password=PASSWORD('#{{get_config('mysql-root-password')}}') WHERE user='root';"
+        163.                mysql -uroot -p#{{get_config('mysql-root-password')}} -e "GRANT ALL ON #{{get_config('dbname')}}.* TO '#{{get_config('app-user')}}'@'%' IDENTIFIED BY '#{{get_config('app-password')}}';" 
+        164.              ]
+        165.              self.resolve_notification_references
+        166.         end
+        167.     end
+        168. end
+        </script>
+        <ideal_output>
+        <security_audit>
+        Line 10: mysql -u root 
+        - Reason: The command uses the well-known default admin username "root" in a command execution context
+        - Violation: Yes
+
+        Line 160: mysql -u root
+        - Reason: The command uses the well-known default admin username "root" in a command execution context
+        - Violation: Yes
+
+        Line 161: mysql -u root
+        - Reason: The command uses the well-known default admin username "root" in a command execution context
+        - Violation: Yes
+
+        Line 162: user='root'
+        - Reason: The command is part of a DML SQL statement, it doesn't pose a security risk.
+        - Violation: No  
+
+        Line 163: mysql -u root
+        - Reason: The command uses the well-known default admin username "root" in a command execution context
+        - Violation: Yes
+        </security_audit>    
+
+        ANSWER: 10, 160, 161, 163
+        </ideal_output>
+        </example>
+        <example>
+        <script>
+        85. bash "comm" do
+        86.   action :nothing
+        87.   user "root"
+        88.   code <<-EOH
+        89.     ls
+        90.   EOH
+        91. end
+        129. bash "configure-firewall" do
+        130.    user "root"
+        131.    code "ufw allow 8080/tcp"
+        132.    not_if "ufw status | grep '8080/tcp'"
+        133.    notifies :reload, "service[ufw]", :immediately
+        134. end
+        152. execute "set-storage-ownership" do
+        153.     user "root"
+        154.     command "chown -R apache:apache /opt/app/storage"
+        155. end
+        </script>
+        <ideal_output>
+        <security_audit>
+        Line 87: user "root"
+        - Reason: The bash command uses the well-known default admin username "root" in an execution context
+        - Violation: Yes
+
+        Line 130: user "root"
+        - Reason: The bash command uses the well-known default admin username "root" in an execution context
+        - Violation: Yes 
+
+        Line 152: user "root"
+        - Reason: The shell command uses the well-known default admin username "root" in an execution context
+        - Violation: Yes 
+        </security_audit>
+
+        ANSWER: 87, 130, 152
+        </ideal_output>
+        </example>
+        <example>
+        <script>
+        61. template "#{{node[:webserver][:conf_dir]}}/#{{config_file}}" do
+        62.   owner       "root"
+        63.   group       "root"
+        64.   mode        "0755"
+        65.   source      "#{{config_file}}.erb"
+        66.   variables(app_config.merge(:webserver => node[:webserver]))
+        67.   notify_startable_services(:webserver, node[:webserver][:services])
+        68. end 
+        </script>
+        <ideal_output>
+        <security_audit>
+        Line 62: owner "root"
+        - Reason: The user is related to ownership, it doesn't pose a security risk. 
+        - Violation: No    
+
+        Line 62: group "root"
+        - Reason: The user is related to ownership, it doesn't pose a security risk. 
+        - Violation: No      
+        </security_audit>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        <example>
+        <script>
+        31. template '/path/to/config/file' do
+        32.   source 'config.erb'
+        33.   variables(
+        34.     :dbuser => node['wordpress']['db']['dbuser'],
+        35.     :dbpassword => node['wordpress']['db']['dbpassword']
+        36.   )
+        37. end
+        38. mysql_database_user node['wordpress']['db']['dbuser'] do
+        39.   password node['wordpress']['db']['dbpassword']
+        40.   action :create
+        41. end
+        </script>
+        <ideal_output>
+        <security_audit>
+        Line 34: :dbuser => node['wordpress']['db']['dbuser']
+        - Reason: This value is not hard-coded and it's not related to an administrator user, it doesn't pose a security risk. 
+        - Violation: No    
+
+        Line 38: node['wordpress']['db']['dbuser']
+        - Reason: This value is not hard-coded, it doesn't pose a security risk. 
+        - Violation: No      
+        </security_audit>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        <example>
+        <script>
+        1. # Define MySQL connection details for the root user
+        2. root_mysql_conn = {{
+        3.   :host => node['wordpress']['database']['host'],
+        4.   :username => node['wordpress']['database']['root_user'],
+        5.   :password => node['wordpress']['database']['root_password']
+        6. }}
+        7. 
+        8. # Base command for MySQL operations as the root user
+        9. base_mysql_command = "/usr/bin/mysql -h #{{node['wordpress']['database']['host']}} -u #{{node['wordpress']['database']['root_user']}} -p#{{node['wordpress']['database']['root_password']}}"
+        10. 
+        11. mysql_connection = Mysql.new(host: node['wordpress']['database']['host'], username: node['wordpress']['database']['root_user'], password:node['wordpress']['database']['root_password'])
+        12. execute "wordpress_clean_db" do
+        13.   command "#{{base_mysql_command}} -e 'DELETE FROM users WHERE `alias`=\"admin\"; DELETE FROM hosts;'"
+        14.   action :nothing
+        15. end
+        </script>
+        <ideal_output>
+        <security_audit>
+        Line 4: :username => node['wordpress']['database']['root_user']
+        - Reason: This value is not hard-coded. It uses a variable that may contain a well-known default admin username (e.g., "root") in a connection context, which could lead to elevated privileges if the variable is not properly controlled.
+        - Violation: Yes    
+
+        Line 9: base_mysql_command = "/usr/bin/mysql -h #{{node['wordpress']['database']['host']}} -u #{{node['wordpress']['database']['root_user']}} -p#{{node['wordpress']['database']['root_password']}}"
+        - Reason: The command constructs a MySQL command using a variable that may contain a well-known default admin username (e.g., "root"), which could lead to elevated privileges if the variable is not properly controlled. 
+        - Violation: Yes      
+
+        Line 11: :username => node['wordpress']['database']['root_user']
+        - Reason: The command constructs a MySQL command using a variable that may contain a well-known default admin username (e.g., "root"), which could lead to elevated privileges if the variable is not properly controlled. 
+        - Violation: Yes      
+
+        Line 13: command "#{{base_mysql_command}} -e 'DELETE FROM users WHERE `alias`=\"admin\"; DELETE FROM hosts;'"
+        - Reason: The command uses a variable that may contain a well-known default admin username (e.g., "admin") but in a SQL DELETE command. It doesn't pose a security risk
+        - Violation: No        
+        </security_audit>
+
+        ANSWER: 4, 9, 11
+        </ideal_output>
+        </example>
+        <example>
+        <script>
+        42. execute "/var/www/drupal-#{{drupal_version}}/drupal" do
+        43.   action :nothing
+        44.   command "rsync --archive --delete /var/www/drupal-#{{drupal_version}}/drupal/ #{{drupal_directory}}"
+        45.   user "drupal"
+        46.   group "drupal"
+        47.   subscribes :run, "archive_file[#{{cache_dir}}/drupal-#{{drupal_version}}.tar.gz]", :immediately
+        48.   subscribes :run, "template[/etc/drupal/settings.php]", :immediately
+        49. end
+        50. git "#{{packages_directory}}/#{{details[:name]}}" do
+        51.   action :sync
+        52.   repository details[:repository]
+        53.   revision details[:revision]
+        54.   user "wordpress"
+        55.   group "wordpress"
+        56. end
+        57. default['civicrm']['allowed_users'] = ['wordpress', 'elasticsearch', 'www-data' ,'mongodb']
+        58. user = (node.platform == 'centos' ? 'mongod' : 'mongodb')
+        </script>
+        <ideal_output>
+        <security_audit>
+        Line 45: user "drupal"
+        - Reason: This value is a service-specific username, it doesn't pose a security risk. 
+        - Violation: No       
+
+        Line 54: user "wordpress"
+        - Reason: This value is a service-specific username, it doesn't pose a security risk. 
+        - Violation: No      
+
+        Line 57: ['wordpress', 'elasticsearch', 'www-data' ,'mongodb']
+        - Reason: 'wordpress', 'elasticsearch', 'www-data' ,'mongodb' are service-specific usernames, the line doesn't pose a security risk. 
+        - Violation: No    
+
+        Line 58: user = (node.platform == 'centos' ? 'mongod' : 'mongodb')
+        - Reason: 'mongod' or 'mongodb' are service-specific usernames, the line doesn't pose a security risk. 
+        - Violation: No    
+        </security_audit>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        <example>
+        <script>
+        22. administrators = node[:accounts][:administrators].to_a
+        35. case details[:status]
+        36.  when "role"
+        37.    user_sh = "/usr/sbin/nologin"
+        38.  when "user", "administrator"
+        39.    user_sh = details[:shell] || account["shell"] || node[:accounts][:shell]
+        40. end
+        </script>
+        <ideal_output>
+        <security_audit>
+        Line 38: when "user", "administrator"
+        - Reason: This is a variable declaration, it doesn't pose a security risk. 
+        - Violation: No       
+        </security_audit>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        </examples>
+
+        Remeber:
+        - **Important:** Ignore any assignments related to ownership (e.g., `owner =>`, `['app_owner']`, `group =>`, `owner "root"`, `group "root"`)
+        - Identify lines where well-known admin usernames are used in command execution (e.g., `mysql -uroot`)
+        - Ignore user creation (e.g., createsuperuser --username)
+        - Ignore lines that assign the owner of a template or file
+        - Ensure that your ANSWER section is the last part of your response, outside the <security_audit> tags, and do not include anything after the ANSWER section.
+
+        Here's the script you need to analyze:
+        <script>
+        {script}
+        </script>
+    severity: "high"
+    description: "Developers should always try to give the least privileges possible. Admin privileges may indicate a security problem. (CWE-250)"
+  - name: "Empty password"
+    prefilterRegEx: |
+      ^\d+\.\s*[^#\s].*$
+    prompt:
+      puppet: |
+        You are a security analyst specializing in Puppet configuration scripts. Your task is to identify potential security vulnerabilities related to empty passwords in the Puppet script I'll provide.
+
+
+        Objective:
+        Analyze the script to identify lines where variables explicitly defined as passwords are assigned empty strings ("" or null) or are prompted and then printed (e.g., echoed).
+
+        Instructions:
+        1. Ignore any test scripts, deployments, or environments.
+        2. Focus only on password variables that are:
+          a) Explicitly defined as passwords in the script.
+          b) Used directly for human user authentication.
+        3. Identify line numbers where:
+          a) A password variable is assigned an explicit empty string ("" or null).
+          b) A password variable is prompted and then printed within the script.
+        4. Do not include lines where passwords are merely evaluated, referenced, or checked against empty strings.
+        5. Report only the line numbers where the vulnerable password assignments or operations occur.
+
+        Analysis Process:
+        Before providing your final answer, wrap your analysis in <security_audit> tags:
+        1. First, determine if the script is a test script, test deployment, or test environment. If it is, immediately report it as such and conclude the analysis.
+        2. List all lines in which there are variables that contain "password" in their name.
+        3. For each password variable, note how it's used (assignment, prompt, etc.).
+        4. Determine if each usage is a vulnerability based on the criteria.
+        5. **Important:** Clearly differentiate between user variables (e.g., $backupuser , COORDINATOR_CELERY_BROKER_TRANSPORT, COMMERCE_COORDINATOR_CELERY_BROKER_USER) and password variables to avoid misclassification.
+
+        Output Format:
+        After your analysis, provide your response in the following format:
+
+        Example output structure (do not use this content, it's just for format reference):
+
+        <security_audit>
+        Line 10: [quote the variable]
+        - Password var: [Yes, if the variable is explicitly defined as password / No, otherwise]
+        - Empty: [Yes, if the variable assigned an empty string / No, otherwise]
+        - Prompted and Echoed: [Yes, if the variable is prompted and then echoed / No, otherwise]
+        - Included: [Yes, if the variable is explicitly defined as password and is Empty or  Prompted and Echoed / No, otherwise]
+        </security_audit>
+
+        ANSWER:  10
+
+        Please proceed with your analysis of the following Ansible script:
+
+        <script>
+        {script}
+        </script>
+
+        Remember:
+        - Ignore variables, parameters and keys that do not represent passwords variables (e.g., COMMERCE_COORDINATOR_CELERY_BROKER_TRANSPORT, COMMERCE_COORDINATOR_CELERY_BROKER_USER)
+        - $private_key_id, $backupuser are not passwords variables names
+        - Ignore expressions like "password' : ensure => absent" because they don't mean empty or null
+        - Ignore expressions like "password => "${{password}}" because they don't mean empty or null
+        - Ensure that your ANSWER section is the last part of your response, outside the <security_audit> tags, and do not include anything after the ANSWER section.
+        - If no line should be reported, report ANSWER: none.  
+      ansible: |
+        You are a security analyst specializing in Ansible configuration scripts. Your task is to identify potential security vulnerabilities related to empty passwords in the Ansible script I'll provide.
+
+
+        Objective:
+        Analyze the script to identify lines where variables explicitly defined as passwords are assigned empty strings ("" or null) or are prompted and then printed (e.g., echoed).
+
+        Instructions:
+        1. Ignore any test scripts, deployments, or environments.
+        2. Focus only on password variables that are:
+          a) Explicitly defined as passwords in the script.
+          b) Used directly for human user authentication.
+        3. Identify line numbers where:
+          a) A password variable is assigned an explicit empty string ("" or null).
+          b) A password variable is prompted and then printed within the script.
+        4. Do not include lines where passwords are merely evaluated, referenced, or checked against empty strings.
+        5. Report only the line numbers where the vulnerable password assignments or operations occur.
+
+        Analysis Process:
+        Before providing your final answer, wrap your analysis in <security_audit> tags:
+        1. First, determine if the script is a test script, test deployment, or test environment. If it is, immediately report it as such and conclude the analysis.
+        2. List all lines in which there are variables that contain "password" in their name.
+        3. For each password variable, note how it's used (assignment, prompt, etc.).
+        4. Determine if each usage is a vulnerability based on the criteria.
+        5. **Important:** Clearly differentiate between user variables (e.g., COORDINATOR_CELERY_BROKER_TRANSPORT, COMMERCE_COORDINATOR_CELERY_BROKER_USER) and password variables to avoid misclassification.
+
+        Output Format:
+        After your analysis, provide your response in the following format:
+
+        Example output structure (do not use this content, it's just for format reference):
+
+        <security_audit>
+        Line 10: [quote the variable]
+        - Password var: [Yes, if the variable is explicitly defined as password / No, otherwise]
+        - Empty: [Yes, if the variable assigned an empty string / No, otherwise]
+        - Prompted and Echoed: [Yes, if the variable is prompted and then echoed / No, otherwise]
+        - Included: [Yes, if the variable is explicitly defined as password and is Empty or  Prompted and Echoed / No, otherwise]
+        </security_audit>
+
+        ANSWER:  10
+
+        Please proceed with your analysis of the following Ansible script:
+
+        <script>
+        {script}
+        </script>
+
+        Remember:
+        - Ignore variables, parameters and keys that do not represent passwords variables (e.g., COMMERCE_COORDINATOR_CELERY_BROKER_TRANSPORT, COMMERCE_COORDINATOR_CELERY_BROKER_USER)
+        - Ensure that your ANSWER section is the last part of your response, outside the <security_audit> tags, and do not include anything after the ANSWER section.
+        - If no line should be reported, report ANSWER: none.    
+      ansible1: |
+        # CONTEXT #
+        The smell 'Empty password' is present when a password attribute, variable, or parameter is assigned an explicit empty string ("") or is prompted and then printed (e.g., echo). An empty password ("") is a string with zero length, and is different from cases where:
+        - A password is non-empty (contains one or more characters).
+        - A password is left unassigned (i.e., no value is provided at all).
+
+        **Note:** 
+        - Only variables explicitly defined as passwords will be considered for this analysis. 
+        - Only password variables used directly for the authentication of a human user will be considered for this analysis.
+
+        #########
+
+        # OBJECTIVE #
+        Your task is to analyze the following configuration Ansible script to identify lines where a variable explicitly defined as a password is assigned an empty string (`""`) or are prompted and then printed. 
+        - Report only the line numbers where:
+          a) a variable that is explicitly defined as a password is assigned an explicit empty string (`""`)
+          b) a password variable is prompted and then printed (e.g., echo) within the script.
+        - Focus solely on password variables as they are provided in the script. Do not infer them or include any other variables or attributes.
+        - **Note:** We are specifically looking for lines where:
+          a) a variable explicitly defined as a password is assigned an empty string, not just evaluated, referenced, or checked
+          b) a password variable is prompted and then printed (e.g., echo) within the script.
+          Therefore, ignore any conditional statements that check if a password is equal to an empty string (`""`), as we are not interested in potential assignments.
+
+        You must report only the line numbers of the identified rows that meet the criteria. Specifically, report the line numbers where the password variables are defined. 
+        The script is numbered (e.g., "1.") for reference.
+
+        #########
+
+        # STYLE #
+        Be concise.
+
+        #########
+
+        # RESPONSE FORMAT #
+        REASON: step by step reasoning.
+        VERIFICATION: double-check if all the instructions have been followed.
+        ANSWER: comma-separated list of line numbers where passwords that meet the criteria are defined.
+
+        #########
+
+        # SCRIPT #
+        {script}
+
+        #########
+
+        REASON: 
+        VERIFICATION: 
+        ANSWER:    
+      default: |
+        # CONTEXT #
+        The smell 'Empty password' is present when a password attribute, variable, or parameter is assigned an explicit empty string (""). An empty password ("") is a string with zero length, and is different from cases where:
+        - A password is non-empty (contains one or more characters).
+        - A password is left unassigned (i.e., no value is provided at all).
+
+        **Note:** Only variables explicitly defined as passwords will be considered for this analysis. 
+
+        #########
+
+        # OBJECTIVE #
+        Your task is to analyze the following configuration script to identify lines where a variable explicitly defined as a password is assigned an empty string (`""`). 
+        - Report only the line numbers where a variable that is explicitly defined as a password is assigned an explicit empty string (`""`).
+        - Focus solely on password variables as they are provided in the script. Do not infer them or include any other variables or attributes.
+        - **Note:** We are specifically looking for lines where a variable explicitly defined as a password is assigned an empty string, not just evaluated, referenced, or checked. This includes ignoring any conditional statements that check if a password is equal to an empty string (`""`), as we are not interested in potential assignments.
+
+        You must report only the line numbers of the identified rows that meet the criteria. 
+        The script is numbered (e.g., "1.") for reference.
+
+        #########
+
+        # STYLE #
+        Be concise.
+
+        #########
+
+        # RESPONSE FORMAT #
+        REASON: step by step reasoning.
+        VERIFICATION: double-check if all the instructions have been followed.
+        ANSWER: comma-separated list of line numbers.
+
+        #########
+
+        # SCRIPT #
+        {script}
+
+        #########
+
+        REASON: 
+        VERIFICATION: 
+        ANSWER:      
+      chef: |
+        # CONTEXT #
+        You are an expert in Infrastructure as Code (IaC) Security. Your task is to analyze a given Puppet script, after "# SCRIPT #" for potential security vulnerabilities, specifically focusing on empty passwords. 
+
+        # OBJECTIVE #
+        Identify lines in the script where a variable explicitly defined as a password is assigned an empty string ("") or nil value.
+
+        Instructions:
+        1. Read through the entire script carefully.
+        2. In your analysis, first identify and list all variables that are explicitly defined as passwords.
+        3. For each identified password variable, check if it is assigned an empty string ("") or nil value anywhere in the script.
+        4. Record the line numbers where a password variable is assigned an empty string or nil.
+
+        Important considerations:
+        - Focus only on variables whose names are traditional names used for passwords, such as 'password', 'passwd', 'secret', 'key', etc.
+        - Ignore variables not explicitly defined as passwords (e.g., usernames, paths, tokens).
+        - Ignore conditional statements (e.g., if) that merely check if a password equals an empty string or nil.
+        - 'fixme' is not considered an empty string.
+
+        Analysis Process:
+        Wrap your analysis in <security_analysis> tags. Within these tags:
+        1. List all password variables in the script, numbering them.
+        2. For each variable, determine if it's explicitly defined as a password, providing reasoning.
+        3. For the identified password variables, search for assignments of empty strings or nil, noting the line numbers.
+
+        # RESPONSE FORMAT #
+        After your analysis, provide your response in the following format:
+        <security_analysis>
+        - Line [Referenced line number]: [note variables representing password. Ignore the rest]
+          - Empty: [Yes, if it is assigned an empty string or nil / No, otherwise.
+          - Password: [Yes, if the name of the variable represents a password. / No, otherwise]
+          - Reason: [Brief reasoning]
+          - Decision: [Include /Not Include]
+        [Repeat for each relevant empty password found]
+        </security_analysis>
+
+        ANSWER: [Comma-separated list of line numbers where empty password have been found. None if no line has been found.]
+
+        <examples>
+        <example>
+        <script>
+        22. default[:apache][:root_password] = nil
+        </script>
+        <ideal_output>
+        <security_analysis>
+        - Line 22: default[:apache][:root_password] = nil
+          Empty: Yes
+          Password: Yes
+          Reason: The variable name represents a traditional password and the variable is assigned nil. So, it meets the criteria.
+          Decision: Include
+        </security_analysis>
+
+        ANSWER: 22
+        </ideal_output>
+        </example>
+        <example>
+        <script>
+        23. default[:apache][:user] = ""
+        24. :admin_username, :kind_of => String, :default => nil
+        </script>
+        <ideal_output>
+        <security_analysis>
+        Nothing to report.
+        </security_analysis>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        <example>
+        <script>
+        25. default[:elastics][:username] = ""
+        </script>
+        <ideal_output>
+        <security_analysis>
+        - Line 25: default[:elastics][:username] = ""
+          Empty: Yes
+          Password: No
+          Reason: The variable name, :username, is not a traditional password. So, if must be ignored.
+          Decision: Not Include
+        </security_analysis>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        <example>
+        <script>
+        255. password = #{{get_config('mysql-password')}}
+        </script>
+        <ideal_output>
+        <security_analysis>
+        - Line 255: password = #{{get_config('mysql-password')}}
+          Empty: No
+          Password: Yes
+          Reason: The variable is assigned an external value, so it is not empty.
+          Decision: Not Include
+        </security_analysis>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        <example>
+        <script>
+        256. password = new_resource.password if new_resource.password
+        </script>
+        <ideal_output>
+        <security_analysis>
+        - Line 256: password = new_resource.password if new_resource.password
+          Empty: No
+          Password: Yes
+          Reason: The variable is assigned through a conditional evaluation, so it is not empty.
+          Decision: Not Include
+        </security_analysis>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        <example>
+        <script>
+        257. if root_password.nil?
+        258.   root_password = secure_password
+        259. end
+        </script>
+        <ideal_output>
+        <security_analysis>
+        - Line 257: if root_password.nil?
+          Empty: No
+          Password: Yes
+          Reason: The variable name, root_password, is only checked for nil. It is ignored.
+          Decision: Not Include
+        </security_analysis>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        </examples>
+
+        Remember:
+        - Focus only on variables and attributes whose names can be considered traditional password variables.
+        - 'fixme' is not an empty string.
+        - Ignore usernames and other variables that are not passwords. 
+          For example, ignore these variables because they cannot be considered a password variable or attribute:
+          - node.default['server_name']
+          - :username
+          - default[:web][:username]
+          - :token
+        - Ensure that your ANSWER section is the last part of your response, outside the <security_analysis> tags, and do not include anything after the ANSWER section.
+
+        # SCRIPT #
+        The following is the Puppet script you need to analyze:
+        <script>
+        {script}
+        </script>
+    severity: "high"
+    description: "An empty password is indicative of a weak password which may lead to a security breach. (CWE-258)"
+  
+  - name: "Hard-coded secret"
+    prefilterRegEx: |
+      ^\d+\.\s*[^#\s].*$
+    prompt: |
+      # CONTEXT #
+      You are an expert in Infrastructure as Code (IaC) Security, tasked with analyzing a configuration script for hard-coded secrets. Your primary focus is on identifying usernames, passwords, and cryptographic private keys that are directly assigned hard-coded values in the script, particularly those used for authentication purposes.
+
+      Here's the script you need to analyze:
+
+      <script>
+      {script}
+      </script>
+
+      # OBJECTIVE #
+      Instructions:
+
+      1. Carefully read through the script, ignoring all comments and their contents completely.
+
+      2. Analyze each non-comment line for the following:
+
+        a. Hard-coded usernames used for authentication:
+            - Only consider usernames that are explicitly used together with hard-coded passwords for authentication or login purposes.
+            - Usernames and their associated passwords may be on different lines.
+            - Ignore usernames when associated with passwords assigned from external variables.
+
+        b. Hard-coded passwords or cryptographic private keys:
+            - Ignore hard-coded passwords or cryptographic private keys when assigned from external variables.
+            - Always report these, regardless of their association with usernames.
+
+        c. Authentication contexts:
+            - If a hard-coded username is found in an authentication context, analyze subsequent lines for associated hard-coded passwords.
+            - Consider the broader context of resources or classes when determining authentication usage.
+
+      3. Ignore the following:
+        - Usernames, password, or cryptographic keys used in the context of apt modules, functions, or resources.
+        - Ignore public keys.
+        - Ignore ssl certificates.
+        - Ignore hard-coded values starting with "puppet:///".
+        - Empty values assigned to passwords, private keys, or usernames.
+        - Variables assigned non-hard-coded values or values from external sources.
+        - Lines where variables are assigned values of other variables, even if those other variables are hard-coded.
+
+      4. For each potential hard-coded secret, break down your thought process inside <secret_analysis> tags. In this section:
+        - List all non-comment lines that contain potential hard-coded secrets, with line numbers.
+        - For each identified line, explicitly state whether it's a username, password, or private key.
+        - Consider the context of each line, including surrounding lines for authentication pairs.
+        - Make an explicit decision for each line on whether to include it in the final answer.
+
+        Consider:
+        - Is this truly a hard-coded value or a variable reference?
+        - For usernames, is it explicitly used with a hard-coded password for authentication, regardless of whether they are on the same line? 
+        - For passwords or private keys, in what context are they used?
+        - How does this line relate to the broader script context?
+
+      # RESPONSE FORMAT #
+      5. After your analysis, provide your response in the following format:
+
+      <secret_analysis>
+      1. Potential hard-coded secrets:
+        Line [referenced line number]: [potential hard-coded secrets found]
+      
+      2. Analysis:
+        Line X:
+        - [username / password / cryptographic key assignment]
+        - [For username, provide the associated password reported in the script]
+        - [motivate why it is hard-coded and meets the criteria. For hard-coded usernames, if associated with an explicit hard-coded password]
+        - Decision: [Include / Not include]
+        [Repeat for each relevant hard-coded secret found]
+      </secret_analysis>
+
+      ANSWER: [Comma-separated list of line numbers where hard-coded secrets have been found]
+
+      Example output structure (do not use this content, it's just for format reference):
+
+      <secret_analysis>
+      1. Potential hard-coded secrets:
+        Line 41: `db_user => $db_user`
+        Line 42: `db_password => 'secret123'`
+        Line 53: `$user_name = pick($config['user_name'], 'default_user')`
+        Line 55: `$password = pick($config['password'], $var_password)`
+        Line 61: `rabbitmq_user_permissions {{ 'usr@node':`
+
+      2. Analysis:
+        Line 41: 
+        - This is a username assignment
+        - `db_password => 'secret123'`
+        - It's not hard-coded (uses a variable)
+        - Decision: Do not include in final answer
+
+        Line 42:
+        - This is a password assignment
+        - It's hard-coded with the value 'secret123'
+        - Used in database configuration context
+        - Associated with non-hard-coded username on previous line
+        - Decision: Include in final answer
+
+        Line 53: 
+        - This is a username assignment
+        - `$password = pick($config['password'], $var_password)`
+        - It's hard-coded but the related password ($password) is not hard-coded (uses a variable $var_password)
+        - Decision: Do not include in final answer
+
+        Line 61: 
+        - This is a username assignment but it is part of the `rabbitmq_user_permissions` resource
+        - It's hard-coded but does not have an associated hard-coded password in this context
+        - Decision: Do not include in final answer
+      </secret_analysis>
+
+      ANSWER: 42
+
+      Remember:
+      - Be concise in your final response while ensuring all relevant information is included.
+      - Ignore usernames, password, and cryptographic keys in the context of apt modules, functions, and resources.
+      - Ignore public keys.
+      - Ignore all ssl options and parameters, such as certificates, cipher, pass phrase dialog, and cryptodevice.
+      - Ignore hard-coded values starting with "puppet:///".
+      - Ignore assignments in rabbitmq_user_permissions 
+      - Ignore hard-coded usernames that are not associated with explicit hard-coded passwords.
+      - Ignore $password_auth = 'no'
+      - Ensure that your ANSWER section is the last part of your response, outside the <secret_analysis> tags, and do not include anything after the ANSWER section.
+    severity: "high"
+    description: "Developers should not reveal sensitive information in the source code. (CWE-798)"
+
+  - name: "Unrestricted IP Address"
+    analysisEnd: "ANSWER:"
+    prompt: |
+      # CONTEXT #
+      The smell 'Unrestricted IP Address’ is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network. Such binding can cause security problems as the server, service, or instance will be exposed to all IP addresses for connection. For example, practitioners have reported how binding to 0.0.0.0 facilitated security problems for MySQL (database server), Memcached (cloud-based cache service) and Kibana (cloud based visualization service).
+
+      #########
+
+      # OBJECTIVE #
+      Your task is to analyze the following configuration script to identify rows where the address 0.0.0.0 is assigned to an attribute, variable, or parameter regarding to a database server or a cloud service/instance.
+
+      You must report only the line numbers of the identified rows that meet the criteria. 
+      The script is numbered (e.g., "1.") for reference.
+
+      #########
+
+      # STYLE #
+      Be concise.
+
+      #########
+
+      # RESPONSE FORMAT #
+      REASON: step by step reasoning.
+      ANSWER: comma-separated list of line numbers.
+
+      #########
+
+      # SCRIPT #
+      {script}
+
+      #########
+
+      REASON: 
+      ANSWER:
+
+      Remeber:
+      - The address 0.0.0.0 must be explicitly assigned.
+      - Ignore all the SQL statements (e.g., SELECT, INSERT, CREATE, GRANT), they must be discarded.
+    severity: "high"
+    description: "Binding to the address 0.0.0.0 allows connections from every possible network which might be a security issues. (CWE-284)"
+
+  - name: "Suspicious comment"
+    analysisStart: "<comment_analysis>"
+    analysisEnd: "</comment_analysis>"
+    prefilterRegEx1: |
+      ^\d+\.\s*#.*
+    prefilterRegEx: |
+      ^\d+\.\s*.*#.*
+    prompt: |
+      # CONTEXT #
+      You are an expert in Infrastructure as Code (IaC) Security, specializing in analyzing configuration scripts for Ansible, Puppet, and Chef. Your task is to identify potentially problematic commented lines in the following script:
+
+      <script>
+      {script}
+      </script>
+
+      # OBJECTIVE #
+      Instructions:
+      1. Analyze only the lines in the script that start with '#' (commented lines).
+      2. Identify comments that meet ALL of these criteria:
+        a) Contains one or more keywords (case-insensitive): "bug", "debug", "todo", "to-do", "to_do", "to be implemented", "fix", "issue", "problem", "solve", "hack", "ticket", "later", "incorrect", "fixme"
+        b) The keyword is not part of a URL
+        c) Clearly indicates the presence of issues, defects, a future task to do, or weaknesses in the system, without a workaround. Specific Ansible, Puppet, or Chef limitations are not problematic.
+
+      3. Report the line numbers of comments meeting all criteria. Note that the script is numbered (e.g., "1.") for reference. The line numbers you should 
+      report are these referenced numbers.
+
+      # RESPONSE FORMAT #
+      Analysis Process:
+      Perform your analysis inside <comment_analysis> tags. Begin by listing all commented lines with their line numbers. Then, for each comment:
+
+      <comment_analysis>
+      All commented lines:
+      [List all lines starting with '#' along with their line numbers where the provided keywords are present]
+
+      For each identified commented line:
+      Line: [referenced line number]
+      Keywords found: 
+      Keywords defined: [Yes / No]
+      Reasoning: [Explain why these keywords were identified and why this does or does not indicate a issue, an enhancement, or a future implementation or task. The presence of a workaround doesn't make the issue problematic.]
+      Conclusion: [Problematic / Not problematic / Part of a URL / Part of a workaround]
+      </comment_analysis>
+
+      After analyzing all relevant comments, provide your final response in this format:
+
+      ANSWER: [Comma-separated list of referenced line numbers for problematic comments]
+
+      Remember:
+      - Analyze only lines starting with '#'.
+      - Focus only on lines containing the keywords defined in step 2. Ignore the others.
+      - Remember to ignore comments that are discussed in the context of a workaround.
+      - Be thorough but concise in your analysis.
+      - Report only referenced line numbers meeting all criteria in the ANSWER section.
+      - Do not include anything after the ANSWER section.
+    severity: "high"
+    description: "Comments with keywords such as TODO HACK or FIXME may reveal problems possibly exploitable. (CWE-546)"
+
+  - name: "Use of HTTP without SSL/TLS"
+    analysisStart: "<url_analysis>"
+    analysisEnd: "</url_analysis>"
+    prefilterRegEx: |
+      ^(?!.*#.*http://).*http://[^\s]+
+    exclude: |
+      http://media.konigi.com|http://fastdl.mongodb.org|http://www.jpackage.org|http://download.sonatype.com
+    prompt: 
+      chef: |
+        # CONTEXT #
+        You are an expert in Infrastructure as Code (IaC) Security, tasked with analyzing a script for potential security vulnerabilities. Your primary focus is to identify and report the use of insecure HTTP URLs. This includes both static URLs (e.g., "http://example.com") and dynamic URLs that use template variables (e.g., "http://{{ variable_name }}/path"). 
+
+        # OBJECTIVE #
+        Your task is to methodically analyze the URLs in the following IaC script:
+
+        <iac_script>
+        {script}
+        </iac_script>
+
+
+        Follow these steps:
+        1. Read through the script line by line, ignoring all commented lines (those starting with '#').
+        2. For each line, check if it contains a URL. Pay special attention to template URLs containing variables.
+        3. If a URL is found, determine which URLs should be reported based on these rules:
+          - Include URLs starting with "http://", even if they are template URLs using variables, even if they appear multiple times
+          - Exclude URLs in comments
+          - Exclude Loopback Address URLs (starting with "http://localhost" or "http://127.0.0.1")
+          - Exclude URLs starting with "https://"
+          - Exclude URLs related to apt services or package distribution services (e.g., http://${{apt_hostname}}/, http://${{apt_mirror_hostname}}, http://www.jpackage.org, http://download.sonatype.com)
+          - Exclude the following URLs: http://media.konigi.com, http://fastdl.mongodb.org
+        4. Add reportable URLs to your list, including multiple occurrences
+        5. Provide a detailed analysis of your findings
+
+        Important: Loopback Address URLs are only the ones that start with "http://localhost" or "http://127.0.0.1".
+        Crucial: Pay close attention to URLs that are dynamically generated using variables.
+
+        # RESPONSE FORMAT #
+        Provide your analysis in the following format:
+
+        <url_analysis>
+        Evaluation:
+        1. Line [number]: [Meets/Does not meet] criteria [(reason if does not meet)]
+        [Continue for each relevant line]
+        </url_analysis>
+
+        ANSWER: [Comma-separated list of line numbers where reportable HTTP URLs are used]
+
+        Example output structure:
+        <url_analysis>
+        Evaluation:
+        1. Line 9: Meets criteria 
+        2. Line 12: Meets criteria 
+        3. Line 14: Does not meet criteria (Loopback Address)
+        4. Line 20: Does not meet criteria (In comment)
+        </url_analysis>
+        ANSWER: 9, 12
+
+        Remember:
+        - Ignore any url related to apt services or package distribution (e.g, http://${{apt_hostname}}/, http://${{apt_mirror_hostname}}, http://www.jpackage.org), http://download.sonatype.com).
+        - **Important:** Ignore the following URLs: http://media.konigi.com, http://fastdl.mongodb.org
+        - Ensure that your ANSWER section is the last part of your response, outside the <url_analysis> tags, and do not include anything after the ANSWER section.
+      default: |
+        # CONTEXT #
+        You are an expert in Infrastructure as Code (IaC) Security, tasked with analyzing a script for potential security vulnerabilities. Your primary focus is to identify and report the use of insecure HTTP URLs. This includes both static URLs (e.g., "http://example.com") and dynamic URLs that use template variables (e.g., "http://{{ variable_name }}/path"). 
+
+        # OBJECTIVE #
+        Your task is to methodically analyze the URLs in the following IaC script:
+
+        <iac_script>
+        {script}
+        </iac_script>
+
+
+        Follow these steps:
+        1. Read through the script line by line, ignoring all commented lines (those starting with '#').
+        2. For each line, check if it contains a URL. Pay special attention to template URLs containing variables.
+        3. If a URL is found, determine which URLs should be reported based on these rules:
+          - Include URLs starting with "http://", even if they are template URLs using variables, even if they appear multiple times
+          - Exclude URLs in comments
+          - Exclude Loopback Address URLs (starting with "http://localhost" or "http://127.0.0.1")
+          - Exclude URLs starting with "https://"
+          - Exclude URLs related to apt services or package distribution services (e.g., http://${{apt_hostname}}/, http://${{apt_mirror_hostname}}, http://www.jpackage.org, http://download.sonatype.com)
+        4. Add reportable URLs to your list, including multiple occurrences
+        5. Provide a detailed analysis of your findings
+
+        Important: Loopback Address URLs are only the ones that start with "http://localhost" or "http://127.0.0.1".
+        Crucial: Pay close attention to URLs that are dynamically generated using variables.
+
+        # RESPONSE FORMAT #
+        Provide your analysis in the following format:
+
+        <url_analysis>
+        Evaluation:
+        1. Line [number]: [Meets/Does not meet] criteria [(reason if does not meet)]
+        [Continue for each relevant line]
+        </url_analysis>
+
+        ANSWER: [Comma-separated list of line numbers where reportable HTTP URLs are used]
+
+        Example output structure:
+        <url_analysis>
+        Evaluation:
+        1. Line 9: Meets criteria 
+        2. Line 12: Meets criteria 
+        3. Line 14: Does not meet criteria (Loopback Address)
+        4. Line 20: Does not meet criteria (In comment)
+        </url_analysis>
+        ANSWER: 9, 12
+
+        Remember:
+        - Ignore any url related to apt services or package distribution (e.g, http://${{apt_hostname}}/, http://${{apt_mirror_hostname}}, http://www.jpackage.org), http://download.sonatype.com).
+        - Ensure that your ANSWER section is the last part of your response, outside the <url_analysis> tags, and do not include anything after the ANSWER section.
+    severity: "high"
+    description: "The developers should always favor the usage of HTTPS. (CWE-319)"
+
+  - name: "Use of weak cryptography algorithms"
+    prompt: 
+      puppet: |
+        # CONTEXT #
+        The smell 'Use of weak cryptography algorithms' refers to the recurring pattern of using weak cryptography algorithms, such as DES, RC4, MD4, and SHA-1, for encrypting information or for authentication purposes. Algorithms like MD5, SHA-1, and others have known vulnerabilities, including susceptibility to collision attacks, which can compromise the security of data. This issue is related to ‘CWE-327: Use of a Broken or Risky Cryptographic Algorithm’ and ‘CWE-326: Inadequate Encryption Strength’. Using weak algorithms for hashing information, such as passwords or personal data, or for authentication can lead to significant security risks.
+
+        **Pay special attention to the syntax used in the script. For example, in Puppet, the `!` character means 'not' so it is used to exclude specific algorithms from a configuration. Lines that use the `!` character to indicate exclusions (e.g., `!RC4`, `!3DES`, `!MD5`) should not be reported, as they indicate that these algorithms are explicitly excluded from use.** For example, `$cipher = 'HIGH:!MD5:!RC4'` implies that MD5 and RC4 are both excluded, so the line must not be reported. However, `$cipher = 'HIGH:!MD5:3DES'` implies that MD5 s excluded but 3DES is included, so the line must be considered.**
+
+        #########
+
+        # OBJECTIVE #
+        Your task is to analyze the following configuration script to identify lines where weak cryptography algorithms (specifically DES, RC4, MD4, and SHA-1) are explicitly used to encrypt information (such as passwords, personal data, or any other sensitive information) or in authentication mechanisms (e.g., MAC algorithms, password hashing).
+
+        - Focus solely on identifying instances where weak cryptography algorithms are directly applied to encrypt data or for authentication purposes.
+        - The presence of cipher strength categories such as `HIGH` or `MEDIUM` does not imply the inclusion of weak algorithms.
+        - **Important:** Ignore cryptography algorithms used for checksum
+        - Take into account the overall context of the script to determine if weak algorithms are being used by a class or function for encryption or authentication.
+
+
+        The script is numbered (e.g., "1.") for reference.
+
+
+        #########
+
+        # RESPONSE FORMAT #
+        REASON: step by step reasoning.
+        VERIFICATION: double-check if all the instructions have been followed. In particular, have weak cryptography algorithms been used explicitly for encrypting information or in authentication? 
+        ANSWER: comma-separated list of line numbers.
+
+        #########
+
+        # SCRIPT #
+        {script}
+
+        #########
+
+        REASON: 
+        VERIFICATION:
+        ANSWER:
+
+        **Crucial:** 
+        - Ignore cryptography algorithms used for checksum or for hashing
+        - $ciphers = ['DES-CBC3-SHA','!DES'] excludes 'DES' but includes 'DES-CBC3-SHA'
+      default: |
+        # CONTEXT #
+        The smell 'Use of weak cryptography algorithms' refers to the recurring pattern of using weak cryptography algorithms, such as DES, RC4, MD4, and SHA-1, for encrypting information or for authentication purposes. Algorithms like MD5, SHA-1, and others have known vulnerabilities, including susceptibility to collision attacks, which can compromise the security of data. This issue is related to ‘CWE-327: Use of a Broken or Risky Cryptographic Algorithm’ and ‘CWE-326: Inadequate Encryption Strength’. Using weak algorithms for hashing information, such as passwords or personal data, or for authentication can lead to significant security risks.
+
+        **Pay special attention to the syntax used in the script. For example, in Puppet, the `!` character means 'not' so it is used to exclude specific algorithms from a configuration. Lines that use the `!` character to indicate exclusions (e.g., `!RC4`, `!3DES`, `!MD5`) should not be reported, as they indicate that these algorithms are explicitly excluded from use.** For example, `$cipher = 'HIGH:!MD5:!RC4'` implies that MD5 and RC4 are both excluded, so the line must not be reported. However, `$cipher = 'HIGH:!MD5:3DES'` implies that MD5 s excluded but 3DES is included, so the line must be considered.**
+
+        #########
+
+        # OBJECTIVE #
+        Your task is to analyze the following configuration script to identify lines where weak cryptography algorithms (specifically DES, RC4, MD4, and SHA-1) are explicitly used to encrypt information (such as passwords, personal data, or any other sensitive information) or in authentication mechanisms (e.g., MAC algorithms, password hashing).
+
+        - Focus solely on identifying instances where weak cryptography algorithms are directly applied to encrypt data or for authentication purposes.
+        - The presence of cipher strength categories such as `HIGH` or `MEDIUM` does not imply the inclusion of weak algorithms.
+        - **Important:** Ignore cryptography algorithms used for checksum
+        - Take into account the overall context of the script to determine if weak algorithms are being used by a class or function for encryption or authentication.
+
+
+        The script is numbered (e.g., "1.") for reference.
+
+
+        #########
+
+        # RESPONSE FORMAT #
+        REASON: step by step reasoning.
+        VERIFICATION: double-check if all the instructions have been followed. In particular, have weak cryptography algorithms been used explicitly for encrypting information or in authentication? 
+        ANSWER: comma-separated list of line numbers.
+
+        #########
+
+        # SCRIPT #
+        {script}
+
+        #########
+
+        REASON: 
+        VERIFICATION:
+        ANSWER:
+
+        **Crucial:** Ignore cryptography algorithms used for checksum
+    severity: "high"
+    description: "Weak crypto algorithms should be avoided since they are susceptible to security issues. (CWE-326 | CWE-327)"
+
+  - name: "No integrity check"
+    analysisStart: "<iac_security_analysis>"
+    analysisEnd: "</iac_security_analysis>"
+    onlyCheckRegExpr: "Yes"
+    prefilterRegEx: |
+      \b(get_url|uri|wget|file|archive|exec|vcsrepo|yumrepo|remote_file|execute|http_request)\b
+    prompt: |
+      # CONTEXT #
+      You are an expert in Infrastructure as Code (IaC) Security. Your task is to analyze a script for potential security vulnerabilities, specifically 
+      focusing on downloads from the internet without integrity checks.
+
+      Here is the script you need to analyze:
+
+      <iac_script>
+      {script}
+      </iac_script>
+
+      # OBJECTIVE #
+      Your objective is to identify lines in the script where content is explicitly downloaded from external internet sources without an integrity check, 
+      using specific modules, functions, or resources provided by the script type (Ansible, Puppet, or Chef).
+
+      Follow these steps to complete your analysis:
+
+      1. Determine the script type (Ansible, Puppet, or Chef) based on the syntax and modules used.
+
+      2. Focus ONLY on the following download-related modules/resources:
+        - Ansible: get_url, uri, wget
+        - Puppet: file, archive, exec, vcsrepo, yumrepo
+        - Chef: remote_file, wget, execute, http_request
+
+        Important: Ignore all other modules/resources, even if they seem to download content. For example:
+        - In Ansible, ignore 'git', 'apt' modules
+        - In Puppet, ignore 'package' resource
+        - In Chef, ignore 'package' resource
+
+      3. Analyze the script line by line, focusing on the identified download-related modules/resources. For each relevant line:
+        a. Verify if it explicitly downloads content from the internet.
+        b. Check if the line or its parent module/resource includes an integrity check (checksum, GPG signature, etc.).
+        c. Determine if the URL is fully defined. If a variable is used in the URL, consider it undefined unless explicitly stated otherwise in the script. An URL is undefined if it doesn't start with the protocol type (e.g., 'http://' or 'https://')
+        d. If the line meets all criteria (uses a specified download module, downloads from the internet, lacks integrity check, and has a defined URL), 
+      record its line number.
+
+      4. Exclude from your analysis:
+        - git, package, cron, and rpm_key commands
+        - Lines that only define URLs or variables pointing to URLs without invoking a download action
+        - Lines that involve URLs that don't start with the protocol type (e.g., 'http://' or 'https://')
+        - Downloads from localhost, internal paths, or internal resources
+        - Resources that specify a GPG key or checksum and perform integrity checks internally
+
+      5. If an identified line is part of a module, resource, or function that performs integrity checks internally, report only the line number of the 
+      parent module, resource, or function.
+
+      6. Report only the line where the specific module, function, or resource of the script type has been used. For example, in multi-line blocks, report 
+      only the first line of the block.
+
+      # RESPONSE FORMAT #
+      Before providing your final answer, wrap your thorough analysis in iac_security_analysis tags:
+
+      <iac_security_analysis>
+      Script type: [Ansible/Puppet/Chef]
+
+      1. Relevant Modules/Resources Identification:
+        [List all occurrences of the specified modules/resources found in the script. If the modules/resources found are not defined in step 2, ignore]
+
+      2. Line-by-line analysis:
+        [For each relevant line, provide the following information:]
+        Line X:
+        a) Relevant line: [Quote the line]
+        b) Module/resource used: [Specify]
+        c) Module/resource defined in step 2: [Yes/No]
+        d) Downloads from internet: [Yes/No]
+        e) Has integrity check: [Yes/No]
+        f) URL: [Specify]
+        g) URL starts with explicit protocol: [Yes/No]
+        h) Parent module/resource integrity check: [Yes/No/N/A]
+        i) Step-by-step thought process:
+            1. [First step in reasoning]
+            2. [Second step in reasoning]
+            3. [Third step in reasoning]
+            ...
+        j) Categorization: [Potential Vulnerability/Secure/Needs Further Investigation]
+        k) Conclusion: [Include/Exclude] this line. Always exclude if 'Module/resource defined in step 2' is No
+
+      3. Summary of findings:
+        [List all secure instances identified]
+
+      4. Final analysis:
+        [Provide a concise explanation of your findings and the reasoning behind your final answer]
+      </iac_security_analysis>
+
+      After your analysis, provide your final answer in this format:
+
+      ANSWER: [Comma-separated list of line numbers where vulnerabilities were identified]
+
+      If no vulnerabilities are identified, respond with:
+
+      ANSWER: No vulnerabilities identified
+
+      Remember:
+      - Focus only on the script type and the specific modules, functions, or resources defined in step 2.
+      - Do not assume that URLs involving variables are internet downloads unless explicitly stated in the script. Treat such URLs as undefined in your 
+      analysis. URLs must explicitly start with the protocol type (e.g., 'http://' or 'https://').
+      - Be thorough in your analysis, ensuring you've considered all relevant lines and modules/resources.
+      - Ensure that your ANSWER section is the last part of your response, outside the <iac_security_analysis> tags.
+    severity: "high"
+    description: "The content of files downloaded from the internet should be checked. (CWE-353)"
+
+  - name: "Missing Default in Case Statement"
+    prefilterRegEx: |
+      ^\d+\.\s*[^#\s].*$
+    dontAnalyzeRegEx: 
+      puppet: |
+        (case|\?)
+    prompt: 
+      ansible: |
+        Report the following without anything else.
+        ANSWER: None
+      puppet: |
+        # CONTEXT #
+        You are an expert in Infrastructure as Code (IaC) Security Analysis. Your task is to analyze a Puppet configuration script for potential security vulnerabilities, specifically focusing on missing default cases in conditional statements.
+
+        # OBJECTIVE #
+        Instructions:
+
+        1. Follow these analysis guidelines:
+          - Only analyze 'case' constructs and ternary operators ('?') without default clauses.
+          - Always ignore 'if' statements and '<| |>' constructs.
+          - Ignore other constructs, modules, or resources.
+
+        2. For each relevant construct:
+          - Identify the line number.
+          - Determine if it matches the criteria defined in step 1 for the script type.
+          - Check for a default clause by focusing on the end of the statement block.
+          - If there's no default clause, report the line number.
+          - Treat nested constructs as separate cases, analyzing them independently.
+
+        3. **Important Clarification**: The lines you analyze must explicitly contain a ternary operator (`?`) or a 'case' statement. Otherwise, they must be ignored. This includes:
+          - Simple assignment statements.
+          - Conditional statements that do not use the specified constructs.
+          - Any other constructs, modules, or resources that do not meet the criteria.
+
+        4. Ignore ternary constructs that depend on variables assigned a default value before their conditional evaluation, or are boolean-based decision.
+
+        5. Wrap your analysis inside <security_analysis_breakdown> tags. Within these tags:
+          a. List all constructs found in the script as defined in step 1, if and only if explicitly containing '?' or 'case', along with their line numbers, otherwise ignore.
+          b. Remember to list also nested '?' or 'case' constructors.
+          c. For each construct:
+              - Report if the construct is relevant based on the script type.
+              - Verify if the construct depends on a boolean variable or it is a boolean-based decision (if so, it should not be reported).
+              - Analyze whether it has a default clause, focusing on the end of the statement block.
+              - If it's nested, explicitly note this and analyze it independently.
+              - Determine if it should be reported based on the script type and presence of a default clause.
+
+        6. After your analysis, provide your final output in the following format:
+
+        <security_analysis_breakdown>
+        - Line X:  
+          - Constructor: [ ? or case, if and only if the line explicitly contains '?' or 'case', None otherwise]
+          - Boolean Variable: [Yes if it depends on a boolean variable or it is a boolean-based decision, No otherwise]
+          - Default clause: [Yes if the statement block has the default clause, No otherwise]
+          - Should be reported: [Yes only if constructor is not None, Boolean Variable is No and Default clause is No/ No]
+        [Repeat for each relevant construct, including nested ones]
+        </security_analysis_breakdown>
+
+        ANSWER: [Comma-separated list of line numbers where relevant constructs without default clauses were found. If no such constructs were found or if the script is Ansible, write 'None'.]
+
+        <examples>
+        <example>
+        <iac_script>
+        1. nginx::vhost {{
+        2.   default:
+        3.     server_name => '_',
+        4.     root        => '/var/www/default',
+        5.     listen      => 80;
+        6. 
+        7.   "site-${{name}}":
+        8.     server_name => $name,
+        9.     root        => "/var/www/${{name}}";
+        10. 
+        11.   "ssl-${{name}}":
+        12.     server_name => "${{name}}_ssl",
+        13.     root        => "/var/www/${{name}}",
+        14.     listen      => 443,
+        15.     ssl         => true;
+        16. }}
+        </iac_script>
+        <ideal_output>
+        <security_analysis_breakdown>  
+        - Line 1-2: nginx::vhost {{ (It doesn't contain a ternary operator or case statement)
+        No line to be reported because there are no explicit ternary operators '?' or 'case' constructors.
+        </security_analysis_breakdown>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        <example>
+        <iac_script>
+        17. $status = 'active'
+        18. case $status {{
+        19.  'active': {{
+        20.    notice('The status is active.')
+        21.  }}
+        22.  'inactive': {{
+        23.    notice('The status is inactive.')
+        24.  }}
+        25.  'suspended': {{
+        26.    notice('The status is suspended.')
+        27.  }}
+        28.  default: {{
+        29.    notice('The status is unknown.')
+        30.  }}
+        31. }}
+        </iac_script>
+        <ideal_output>
+        <security_analysis_breakdown>  
+        - Line 18: case $status {{ .. default: {{ .. }} .. }} (has default clause: default: {{ .. }})
+          - Constructor: case
+          - Boolean Variable: No
+          - Default clause: Yes
+          - Should be reported: No
+        </security_analysis_breakdown>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        <example>
+        <iac_script>
+        10. $log_switch = $do_log ? {{
+        11.   true  => 'ON',
+        12.   false => 'OFF',
+        13. }}
+        </iac_script>
+        <ideal_output>
+        <security_analysis_breakdown>
+        - Line 10: $log_switch = $do_log ? {{ .. }} (no default clause, but $do_log is a boolean variable and the conditional cases can be only true or false)
+          - Constructor: ?
+          - Boolean Variable: Yes
+          - Default clause: No
+          - Should be reported: No 
+        </security_analysis_breakdown>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        <example>
+        <iac_script>
+        39. $log_directory = "${{custom_log_dir}}" ? {{
+        40.   ''      => '/var/log/default_logs/',  
+        41.   default => "${{custom_log_dir}}",       
+        42. }}
+        </iac_script>
+        <ideal_output>
+        <security_analysis_breakdown>
+        - Line 39: $log_directory = "${{custom_log_dir}}" ? {{ .. default => "${{custom_log_dir}}" }} (has default clause: default => "${{custom_log_dir}}")  
+          - Constructor: ?
+          - Boolean Variable: No
+          - Default clause: Yes
+          - Should be reported: No 
+        </security_analysis_breakdown>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        <example>
+        <iac_script>
+        1. $pkg = $::osfamily ? {{
+        2.   'Debian' => {{
+        3.     'web_server' => $::operatingsystem ? {{
+        4.       'debian' => 'apache2',
+        5.       'ubuntu' => 'apache2.4'
+        7.     }},
+        8.   }},
+        9.   'RedHat' => {{
+        10.    'web_server' => $::operatingsystem ? {{
+        11.      'CentOS' => 'httpd',
+        12.      'Fedora' => 'apache',
+        13.      default  => 'httpd',
+        14.    }},
+        15.  }},
+        16. }}
+        </iac_script>
+        <ideal_output>
+        <security_analysis_breakdown>
+        - Line 1: $pkg = $::osfamily ? {{ .. }} (no default clause)
+          - Constructor: ?
+          - Boolean Variable: No
+          - Default clause: No
+          - Should be reported: Yes
+        - Line 3: 'web_server' => $::operatingsystem ? {{ .. }} (no default clause)
+          - Constructor: ?
+          - Boolean Variable: No
+          - Default clause: No
+          - Should be reported: Yes
+        - Line 10: 'web_server' => $::operatingsystem ? {{ .. default => 'httpd' }} (has default clause: default => 'httpd')
+          - Constructor: ?
+          - Boolean Variable: No
+          - Default clause: Yes
+          - Should be reported: No     
+        </security_analysis_breakdown>
+
+        ANSWER: 1, 3
+        </ideal_output>
+        </example>
+        <example>
+        <iac_script>
+        23. $final_value = "${{input_value}}" ? {{
+        24.   'absent' => "${{fallback_value}}" ? {{
+        25.     'undefined' => "${{default_value}}" ? {{
+        26.       'empty' => 'use_default',
+        27.       default => "${{default_value}}",
+        28.     }},
+        29.     default => "${{fallback_value}}",
+        30.   }},
+        31.   default => $input_value,
+        32. }}
+        </iac_script>
+        <ideal_output>
+        <security_analysis_breakdown>
+        - Line 23: $final_value = "${{input_value}}" ? {{ .. default => $input_value }} (has default clause: default => $input_value)
+          - Constructor: ?
+          - Boolean Variable: No
+          - Default clause: Yes
+          - Should be reported: No
+        - Line 24: 'absent' => "${{fallback_value}}" ? {{ .. default => "${{default_value}}" }} (has default clause: default => "${{default_value}}")
+          - Constructor: ?
+          - Boolean Variable: No
+          - Default clause: Yes
+          - Should be reported: No
+        - Line 25: 'undefined' => "${{default_value}}" ? {{ .. default => "${{default_value}}" }} (has default clause: default => "${{default_value}}")
+          - Constructor: ?
+          - Boolean Variable: No
+          - Default clause: Yes
+          - Should be reported: No     
+        </security_analysis_breakdown>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        <example>
+        <iac_script>
+        31. case $::environment {{
+        32.   'production', 'staging': {{
+        33.     case $::operatingsystemrelease {{
+        34.       /^8\..*/: {{ $user_role = 'admin' }}
+        35.       /^9\..*/: {{ $user_role = 'manager' }}
+        36.       default:  {{ $user_role = 'guest' }}
+        37.     }}
+        38.   }}
+        39.   'development', 'testing': {{
+        40.     case $::operatingsystemrelease {{
+        41.       /^8\..*/: {{ $user_role = 'developer' }}
+        42.       /^9\..*/: {{ $user_role = 'tester' }}
+        43.       default:  {{ $user_role = 'intern' }}
+        44.     }}
+        45.   }}
+        46.   default: {{ $user_role = undef }}
+        47. }}
+        </iac_script>
+        <ideal_output>
+        <security_analysis_breakdown>
+        - Line 31: case $::environment {{ .. default: {{ $user_role = undef }} }} (has default clause: default: {{ $user_role = undef }})
+          - Constructor: case
+          - Boolean Variable: No
+          - Default clause: Yes
+          - Should be reported: No
+        - Line 33: case $::operatingsystemrelease {{ ? {{ .. default:  {{ $user_role = 'guest' }} }} (has default clause: default:  {{ $user_role = 'guest' }}")
+          - Constructor: case
+          - Boolean Variable: No
+          - Default clause: Yes
+          - Should be reported: No
+        - Line 40: case $::operatingsystemrelease {{ .. default:  {{ $user_role = 'intern' }} }} (has default clause: default:  {{ $user_role = 'intern' }})
+          - Constructor: case
+          - Boolean Variable: No
+          - Default clause: Yes
+          - Should be reported: No     
+        </security_analysis_breakdown>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        </examples>
+
+        Remember:
+        - The default clause ('default') in a case statement or ternary operator is typically at the end of the block.
+        - Ignore all other constructs, including 'if' statements, '<| |>' constructs, and any other modules or resources (e.g., pick).
+        - The lines you analyze must explicitly contain a ternary operator (`?`) or a 'case' statement. Otherwise, they must be ignored.
+        - Ensure that your ANSWER section is the last part of your response, outside the <security_analysis_breakdown> tags.
+        - Boolean-based decisions or ternary operators depending on boolean variables should not be reported, even if they lack a default clause.
+        Here is the script you need to analyze:
+
+        <iac_script>
+        {script}
+        </iac_script>
+      chef: |
+        # CONTEXT #
+        You are an expert in Infrastructure as Code (IaC) Security Analysis. Your task is to analyze a configuration Chef script for potential security vulnerabilities, specifically focusing on missing default cases in conditional statements.
+
+        # OBJECTIVE #
+        Instructions:
+
+        1. Follow these analysis guidelines:
+          - Only analyze 'case' constructs without default clauses.
+          - Always ignore 'if' statements.
+          - Ignore other constructs, modules, or resources.
+
+        2. For each relevant construct:
+          - Identify the line number.
+          - Determine if it matches the criteria defined in step 1.
+          - Check for an 'else' clause by focusing on the end of the case block.
+          - If there's no 'else'' clause, report the line number.
+          - Treat nested constructs as separate cases, analyzing them independently.
+
+        3. **Important Clarification**: The lines you analyze must explicitly contain a 'case' statement. Otherwise, they must be ignored. This includes:
+          - Simple assignment statements.
+          - Conditional statements that do not use the 'case' construct.
+          - Any other constructs, modules, or resources that do not meet the criteria.
+
+        4. Wrap your analysis inside <security_analysis_breakdown> tags. Within these tags:
+          a. List all 'case' constructs found in the script as defined in step 1, if and only if explicitly containing 'case', along with their line numbers, otherwise ignore.
+          b. Remember to list also nested 'case' constructors.
+          c. For each construct:
+              - Report if the construct is a 'case' statement.
+              - Verify if the construct depends on a boolean variable or it is a boolean-based decision (if so, it should not be reported).
+              - Analyze whether it has an 'else' clause, focusing on the end of the statement block.
+              - If it's nested, explicitly note this and analyze it independently.
+              - Determine if it should be reported based on the presence of an 'else' clause.
+          d. If there is no line to list, simply answer None.
+        5. After your analysis, provide your final output in the following format:
+
+        <security_analysis_breakdown>
+        - Line X:  
+          - Constructor: [ case, if and only if the line explicitly contains 'case', None otherwise]
+          - Boolean Variable: [Yes if it depends on a boolean variable or it is a boolean-based decision, No otherwise]
+          - Else clause: [Yes if the statement block has the 'else' clause, No otherwise. Remeber 'when' is not an 'else' clause]
+          - Should be reported: [Yes only if constructor is not None, Boolean Variable is No and Else clause is No/ No otherwise]
+        [Repeat for each relevant construct, including nested ones]
+        </security_analysis_breakdown>
+
+        ANSWER: [Comma-separated list of line numbers where relevant constructs without 'else' clauses were found. If no such constructs were found, write 'None'.]
+
+        <examples>
+        <example>
+        <iac_script>
+        10. node['database']['service_package'] = case node['platform']
+        11.                                        when 'debian'
+        12.                                          ['mysql-server']
+        13.                                        when 'amazon', 'suse', 'pld'
+        14.                                          ['mariadb']
+        15.                                        when 'rhel', 'fedora'
+        16.                                          node['platform_version'].to_i >= 8 ? ['mariadb'] : ['mysql']
+        17.                                        when 'solaris2'
+        18.                                          'mysql-core'
+        19.                                        else
+        20.                                          []
+        21.                                       end
+        </iac_script>
+        <ideal_output>
+        <security_analysis_breakdown>
+        - Line 10: case node['platform'] when .. else .. end (has default clause: else [])
+          - Constructor: case
+          - Boolean Variable: No
+          - Else clause: Yes
+          - Should be reported: No  
+        </security_analysis_breakdown>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        <example>
+        <iac_script>
+        23. case system_version.to_i
+        24. when 5
+        25.   config['database_service']['server']['packages'] = ['oracle']
+        27. when 6
+        28.   config['database_service']['server']['packages'] = ['mysql']
+        31. when 2013
+        32.   config['database_service']['server']['packages'] = ['sql-server']
+        35. end
+        36. case config["p_family"]
+        37.     when 'mac_os_x'
+        38.         include_recipe "homebrewalt::default"
+        39.     when 'debian'
+        40.         Chef::Log.debug("Unknown OS")
+        41. end
+        </iac_script>
+        <ideal_output>
+        <security_analysis_breakdown>
+        - Line 23: case system_version.to_i when .. end (no default clause)
+          - Constructor: case
+          - Boolean Variable: No
+          - Else clause: No
+          - Should be reported: Yes  
+        - Line 36: case sconfig["p_family"] when .. end (no default clause)
+          - Constructor: case
+          - Boolean Variable: No
+          - Else clause: No
+          - Should be reported: Yes  
+        </security_analysis_breakdown>
+
+        ANSWER: 23, 36
+        </ideal_output>
+        </example>
+        <example>
+        <iac_script>
+        301. case os_family
+        302. when 'linux'
+        303.   case distro_name
+        304.   when 'amazon-linux'
+        305.      case distro_version.to_i
+        306.      when 2013
+        307.        config['yum']['db57-community']['url'] = 'http://repo.db.com/yum/db-5.7-community/el/6/$arch/'
+        308.      when 2014
+        309.        config['yum']['db57-community']['url'] = 'http://repo.db.com/yum/db-5.7-community/el/6/$arch/'
+        310.      when 2015
+        311.        config['yum']['db57-community']['url'] = 'http://repo.db.com/yum/db-5.7-community/el/6/$arch/'
+        312.      when 2016
+        313.        config['yum']['db57-community']['url'] = 'http://repo.db.com/yum/db-5.7-community/el/6/$arch/'
+        314.      end
+        315.   when 'redhat', 'oracle-linux'
+        316.      case distro_version.to_i
+        317.      when 5
+        318.        config['yum']['db57-community']['url'] = 'http://repo.db.com/yum/db-5.7-community/el/5/$arch/'
+        319.      when 6
+        320.        config['yum']['db57-community']['url'] = 'http://repo.db.com/yum/db-5.7-community/el/6/$arch/'
+        321.      when 7
+        322.        config['yum']['db57-community']['url'] = 'http://repo.db.com/yum/db-5.7-community/el/7/$arch/'
+        323.      end
+        324.   else
+        325.      config['yum']['db57-community']['url'] = 'http://repo.db.com/yum/db-5.7-community/el/$version/$arch/'
+        326.   end
+        327. when 'fedora'
+        328.   config['yum']['db57-community']['url'] = 'http://repo.db.com/yum/db-5.7-community/fc/$version/$arch/'
+        329. end
+        330. begin
+        331.  require 'db_client'
+        332. rescue LoadError
+        333.   case os_name
+        334.   when 'ubuntu', 'debian'
+        335.     package("libdbclient16-dev") {{ action :nothing }}.run_action(:install)
+        336.   when 'centos'
+        337.     package("db-devel") {{ action :nothing }}.run_action(:install)
+        338.   else
+        339.     Logger.warn "No native DB client support for OS #{{os_name}}"
+        340.   end
+        341.
+        342.   # Install the db_client library directly via system package manager or alternative means
+        343.   system('gem install db_client') # Or replace this with the appropriate package manager command
+        344.   require 'db_client'
+        345. end
+        </iac_script>
+        <ideal_output>
+        <security_analysis_breakdown>
+        - Line 301: case os_family when .. end (no default clause)
+          - Constructor: case
+          - Boolean Variable: No
+          - Else clause: No
+          - Should be reported: Yes  
+        - Line 303: case distro_name when .. else .. end (has default clause: else config['yum']['db57-community']['url'] = 'http://repo.db.com/yum/db-5.7-community/el/$version/$arch/')
+          - Constructor: case
+          - Boolean Variable: No
+          - Else clause: Yes
+          - Should be reported: No  
+        - Line 305: case distro_version.to_i when .. end (no default clause)
+          - Constructor: case
+          - Boolean Variable: No
+          - Else clause: No
+          - Should be reported: Yes 
+        - Line 316: case distro_version.to_i when .. end (no default clause)
+          - Constructor: case
+          - Boolean Variable: No
+          - Else clause: No
+          - Should be reported: Yes 
+        - Line 333: case os_name when .. else .. end (has default clause: else Logger.warn "No native DB client support for OS #{{os_name}}")
+          - Constructor: case
+          - Boolean Variable: No
+          - Else clause: Yes
+          - Should be reported: No 
+        </security_analysis_breakdown>
+
+        ANSWER: 301, 305, 316
+        </ideal_output>
+        </example>
+        <example>
+        <iac_script>
+        423. if node['method'] == 'direct'
+        424.   case version
+        425.   when "v_1"
+        426.     default['apache']['dir'] = '/opt/local'
+        427.   else
+        428.     default['apache']['dir'] = '/usr'
+        429.   end
+        430. else
+        431.   default['apache']['dir'] = '/usr/local'
+        432. end
+        </iac_script>
+        <ideal_output>
+        <security_analysis_breakdown>
+        - Line 424: case version when .. else .. end (has default clause: else default['apache']['dir'] = '/usr')
+          - Constructor: case
+          - Boolean Variable: No
+          - Else clause: Yes
+          - Should be reported: No  
+        <security_analysis_breakdown>
+
+        ANSWER: None
+        </ideal_output>
+        </example>
+        </examples>
+
+        Remember:
+        - The 'else' clause in a case statement is at the end of the block before the 'end' keyword.
+        - Ignore all other constructs, including 'if' statements, and any other modules or resources (e.g., pick).
+        - The lines you analyze must explicitly contain a 'case' statement. Otherwise, they must be ignored.
+        - Ensure that your ANSWER section is the last part of your response, outside the <security_analysis_breakdown> tags.
+        - Boolean-based decisions or case values depending on boolean variables should not be reported, even if they lack a 'else' clause.
+
+        Here is the script you need to analyze:
+
+        <iac_script>
+        {script}
+        </iac_script>
+    severity: "high"
+    description: "Not handling every possible input combination might allow an attacker to trigger an error for an unhandled value. (CWE-478)"
