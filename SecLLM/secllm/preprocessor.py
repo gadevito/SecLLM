@@ -35,7 +35,7 @@ class ScriptPreprocessor:
         return processed_script
 
     #
-    #
+    # Filter script lines using the regular expression 'regex'
     #
     def filterBy_regex(self, text, regex):
         """
@@ -55,7 +55,7 @@ class ScriptPreprocessor:
         return "\n".join(filtered_lines)
 
     #
-    # I the regular expression doesn't have matches, then the script will be no analyzed
+    # If the regular expression doesn't have matches, then the script will be no analyzed
     #
     def doNotAnalyze(self, text, regex):
         pattern = re.compile(regex.strip(),re.MULTILINE)
@@ -67,6 +67,9 @@ class ScriptPreprocessor:
             return True
 
 
+    #
+    # Excludes lines from a text that contain one of the specified URLs considered safe
+    #
     def excludeRows(self, text, exclude):
         """
         Excludes lines from a text that contain one of the specified URLs.
