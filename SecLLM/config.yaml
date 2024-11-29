@@ -27,73 +27,6 @@ smells:
     prefilterRegEx: |
       ^\d+\.\s*[^#\s].*$
     prompt:
-      ansible1: |
-        # CONTEXT #
-        You are an expert in Infrastructure as Code (IaC) Security, tasked with analyzing an Ansible configuration script for potential security vulnerabilities.
-        Your specific focus is on identifying the "Execution with Unnecessary Privileges" vulnerability within the script.
-        "Execution with Unnecessary Privileges" is defined as follows:
-        - The product performs an operation at a privilege level that is higher than the minimum level required, which creates new weaknesses or amplifies the consequences of other weaknesses.
-        - New weaknesses can be exposed because running with extra privileges, such as root or Administrator, can disable the normal security checks being performed by the operating system or surrounding environment. Other pre-existing weaknesses can turn into security vulnerabilities if they occur while operating at raised privileges.
-        - Privilege management functions can behave in some less-than-obvious ways, and they have different quirks on different platforms. These inconsistencies are particularly pronounced if you are transitioning from one non-root user to another. Signal handlers and spawned processes run at the privilege of the owning process, so if a process is running as root when a signal fires or a sub-process is executed, the signal handler or sub-process will operate with root privileges.
-
-        # OBJECTIVE #
-        Your objective is to identify users used by Ansible to perform operations at a privilege level that is higher than required.
-
-        Instructions:
-        1. First, determine if the script is a test script, test deployment, or test environment. If it is, immediately report it as such and conclude the analysis.
-        2. Review all rows where administrative privileges are assigned or well-known default administrative users are used in the script. Focus specifically on lines that involve the use of usernames for administrative tasks. 
-        3. For each identified row:
-          a) Identify the specific operations or tasks where the administrative priviledges are used. They can follow the parent key or any nested subkeys related to the line in question. This includes examining the tasks associated with the parent key and any subkeys that pertain to administrative operations.  
-          b) **Consider the context of the entire script, including any roles or tasks defined later that may require elevated privileges.**
-          c) If the specific operations or tasks (i.e, installing, configuring, etc.) typically require administrative privileges, do not flag the row as a potential vulnerability.
-          d) If privileges are excessive for the operation, flag it as a potential vulnerability. However, if the elevated privileges are necessary for the tasks being performed (e.g., installing software, configuring services), do not flag it as a vulnerability.
-          e) If the privilege usage aligns with security best practices (e.g., secure permissions for private keys), do not flag it as a vulnerability. **Proper use of privileges is not a vulnerability (e.g., creating a bash completion script in system directories, accessing files in /home/username, copying a private SSH key to a root-owned, destroying a container).**
-          f) Flag only cases where privileges are escalated without a legitimate need. If privileges are necessary for the task, there is no vulnerability.
-          g) If the operation often requires elevated privileges, there is no vulnerability.
-          h) Consider the context of the script when determining if elevated privileges are necessary. For example, if the script is related to a specific installation or configuration process, evaluate whether the privileges used are truly required for that context, including any roles or tasks defined later in the script.
-        4. Account for platform differences in privilege management. 
-        5. Conclude whether any vulnerabilities related to "Execution with Unnecessary Privileges" exist, and provide recommendations as needed.
-
-        **Important considerations:**
-        - Ignore assignments related to ownership (e.g., `owner: ...`, `group: ...`).
-        - Ignore variables, keys or parameters names that do not represent usernames (i.e., password, tenant, PROJECT_NAME).
-
-        Before providing your final answer, wrap your analysis in <security_analysis> tags. In this analysis:
-        1. Report if the script is a test script, test deployment, or test environment
-        2. Report the purpose of the Ansible script
-        3. Quote the relevant lines and numbering them
-        4. Report specific operations or tasks that follow the parent key or any nested subkeys related to the line in question. This includes examining the tasks associated with the parent key and any subkeys that pertain to administrative operations
-        5. For each identified row, evaluate the vulnerability "Execution with Unnecessary Privileges" taking into account the purpose of the script and the specific operations or tasks that follow the line in question 
-        6. Report if the identified row is affected by the vulnerability "Execution with Unnecessary Privileges"
-
-        # RESPONSE FORMAT #
-        Example structure:
-        <security_analysis>
-        Test script: [Yes, it is a test script, a test deployment or environment / No, otherwise]
-        Script Context: [Purpose of the Ansible script]
-
-        Line X: 
-        - Specific Tasks: [Specific operations or tasks to assess. None otherwise]
-        - Vulnerability: [Evaluate the presence of the vulnerability "Execution with Unnecessary Privileges" considering "Following Tasks" and "Script Context"]
-        - Include: [Yes, it the row is affected by  the vulnerability "Execution with Unnecessary Privileges" / No, otherwise]
-        </security_analysis>
-
-        ANSWER: [Comma-separated list of referenced line numbers where Include is Yes]
-
-        Do not include anything after the ANSWER section.
-
-        Here is the script you need to analyze:
-
-        <script>
-        {script}
-        </script>
-
-        **Crucial:** 
-        - Ignore test scripts, test deployments or test environments.
-        - Fernet-keys need administrative privileges.
-        - Ignore operations that often requires elevated privileges.
-        - Ignore proper use of administrative privileges, such as creating a bash completion script in system directories, accessing or checking files in /home/username/, copying a private SSH key to a root-owned, destroying a container, etc., because it is not a vulnerability
-        - Report in ANSWER only lines where "Include" is Yes.
       default: |
         # CONTEXT #
         The smell 'Admin by default' refers to the pattern of explicitly assigning well-known default users as administrative users in configuration scripts. This can violate the ‘principle of least privilege,’ which recommends that systems should be designed to provide the least amount of access necessary by default. Well-known default admin usernames include `root`, `admin`, `administrator`, or any other platform-specific accounts known to have elevated privileges by default.
@@ -558,54 +491,6 @@ smells:
         - Ignore variables, parameters and keys that do not represent passwords variables (e.g., COMMERCE_COORDINATOR_CELERY_BROKER_TRANSPORT, COMMERCE_COORDINATOR_CELERY_BROKER_USER)
         - Ensure that your ANSWER section is the last part of your response, outside the <security_audit> tags, and do not include anything after the ANSWER section.
         - If no line should be reported, report ANSWER: none.    
-      ansible1: |
-        # CONTEXT #
-        The smell 'Empty password' is present when a password attribute, variable, or parameter is assigned an explicit empty string ("") or is prompted and then printed (e.g., echo). An empty password ("") is a string with zero length, and is different from cases where:
-        - A password is non-empty (contains one or more characters).
-        - A password is left unassigned (i.e., no value is provided at all).
-
-        **Note:** 
-        - Only variables explicitly defined as passwords will be considered for this analysis. 
-        - Only password variables used directly for the authentication of a human user will be considered for this analysis.
-
-        #########
-
-        # OBJECTIVE #
-        Your task is to analyze the following configuration Ansible script to identify lines where a variable explicitly defined as a password is assigned an empty string (`""`) or are prompted and then printed. 
-        - Report only the line numbers where:
-          a) a variable that is explicitly defined as a password is assigned an explicit empty string (`""`)
-          b) a password variable is prompted and then printed (e.g., echo) within the script.
-        - Focus solely on password variables as they are provided in the script. Do not infer them or include any other variables or attributes.
-        - **Note:** We are specifically looking for lines where:
-          a) a variable explicitly defined as a password is assigned an empty string, not just evaluated, referenced, or checked
-          b) a password variable is prompted and then printed (e.g., echo) within the script.
-          Therefore, ignore any conditional statements that check if a password is equal to an empty string (`""`), as we are not interested in potential assignments.
-
-        You must report only the line numbers of the identified rows that meet the criteria. Specifically, report the line numbers where the password variables are defined. 
-        The script is numbered (e.g., "1.") for reference.
-
-        #########
-
-        # STYLE #
-        Be concise.
-
-        #########
-
-        # RESPONSE FORMAT #
-        REASON: step by step reasoning.
-        VERIFICATION: double-check if all the instructions have been followed.
-        ANSWER: comma-separated list of line numbers where passwords that meet the criteria are defined.
-
-        #########
-
-        # SCRIPT #
-        {script}
-
-        #########
-
-        REASON: 
-        VERIFICATION: 
-        ANSWER:    
       default: |
         # CONTEXT #
         The smell 'Empty password' is present when a password attribute, variable, or parameter is assigned an explicit empty string (""). An empty password ("") is a string with zero length, and is different from cases where:
@@ -969,8 +854,6 @@ smells:
   - name: "Suspicious comment"
     analysisStart: "<comment_analysis>"
     analysisEnd: "</comment_analysis>"
-    prefilterRegEx1: |
-      ^\d+\.\s*#.*
     prefilterRegEx: |
       ^\d+\.\s*.*#.*
     prompt: |
