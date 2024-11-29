@@ -54,3 +54,7 @@ To calculate Feiss Kappa and raw agreement percentage, launch the feiss_kappa.py
 ```
 poetry run python ./analysis/feiss_kappa.py <list of output files obtained with the SEQUENCIAL ANALYSIS> --output <output_file>
 ```
+
+## Licence
+Data contained within this replication package is licenced under CC-BY 4.0.
+The licence for the source code contained within this replication package is currently TBD and will be established upon acceptance of the paper after discussion with all involved rightsholders.
