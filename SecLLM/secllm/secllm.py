@@ -105,7 +105,6 @@ class SecLLM:
     def processDirectory(self, dir_path):
         """Processes all script files in a given directory concurrently."""
         results = {}
-        start = time.time()
         # Use ThreadPoolExecutor to process multiple files concurrently
         with ThreadPoolExecutor(max_workers=min(len(os.listdir(dir_path)), 10)) as executor:
             futures = {
@@ -122,8 +121,7 @@ class SecLLM:
                 except Exception as e:
                     print(f"Error processing file '{file_path}': {e}")
         end = time.time()
-        tt = end-start
-        print("TOTAL TIME FOR DIR", tt)
+
         return results
 
     def writeResultsToCSV(self, results, output_file, append=False):
@@ -172,13 +170,13 @@ def printResults(result, directory=False):
             res = r.get('smells', [])
             print(f"\nFile: {r['file']}\n")
             print("=" * 40)
-            for r in res:
-                print(f"Smell: {r['smell']}")
-                print(f"Description: {r['description']}")
-                print(f"Lines: {', '.join(map(str, r['lines']))}")
-                print(f"Analysis:\n{r['analysis']}")
+            for rs in res:
+                print(f"Smell: {rs['smell']}")
+                print(f"Description: {rs['description']}")
+                print(f"Lines: {', '.join(map(str, rs['lines']))}")
+                print(f"Analysis:\n{rs['analysis']}")
                 print("-" * 40)
-            print(f"Time: {r['time']}")
+            print(f"Time: {r.get('time',0)}")
             print(f"Input Tokens: {r['input']}")
             print(f"Output Tokens: {r['output']}\n")
             print("=" * 40)
