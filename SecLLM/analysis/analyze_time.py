@@ -9,17 +9,29 @@ def main(filename):
     except Exception as e:
         df = pd.read_csv(filename,sep=",")
 
-    # Raggruppa per 'PATH' e calcola le statistiche desiderate per singoli gruppi
-    grouped = df.groupby('PATH')['TIME'].agg(['sum', 'mean', 'median', 'count'])
+    df['TIME'] = pd.to_numeric(df['TIME'], errors='coerce')  # Converti a numerico
+    df.dropna(subset=['TIME'], inplace=True)  # Rimuovi NaN
+
+    # Raggruppa per 'PATH' e calcola statistiche desiderate
+    grouped = df.groupby('PATH').agg(
+        sum=('TIME', 'first'),  # Prendi solo il primo valore di TIME
+        mean=('TIME', 'mean'),
+        median=('TIME', 'median'),
+        count=('TIME', 'size')
+    )
+
+    # Stampa il dataframe aggregato per il debug
+    print(grouped)
 
     # Calcola il numero totale di gruppi
     number_of_groups = grouped.shape[0]
 
     # Calcola la somma totale e la media totale su tutti i dati
-    total_sum = df['TIME'].sum()
-    total_mean = df['TIME'].mean()
-    total_std = df['TIME'].std()  # Deviazione standard totale su tutti i valori
-    total_median = df['TIME'].median()
+    total_sum = grouped['sum'].sum()  # Somma dei primi valori per gruppo
+    total_std = grouped['sum'].std()  # Deviazione standard totale
+    total_median = grouped['median'].median()
+    total_rows = grouped.shape[0]  # Numero totale di righe nel dataframe
+    total_mean = total_sum / total_rows if total_rows > 0 else 0  # Media
 
     # Stampa i risultati
     print(f"Numero totale di gruppi: {number_of_groups}")
