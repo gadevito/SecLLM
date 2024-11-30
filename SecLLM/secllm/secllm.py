@@ -83,6 +83,7 @@ class SecLLM:
                 try:
                     result = future.result()  # Get the result of checkSmell
                     if result is not None:
+                        #result['file'] = file_path
                         results.append(result)
                 except Exception as e:
                     print(f"Error processing smell '{smell_name}': {e}")
@@ -104,7 +105,7 @@ class SecLLM:
     def processDirectory(self, dir_path):
         """Processes all script files in a given directory concurrently."""
         results = {}
-
+        start = time.time()
         # Use ThreadPoolExecutor to process multiple files concurrently
         with ThreadPoolExecutor(max_workers=min(len(os.listdir(dir_path)), 10)) as executor:
             futures = {
@@ -120,7 +121,9 @@ class SecLLM:
                     results[file_path] = result
                 except Exception as e:
                     print(f"Error processing file '{file_path}': {e}")
-        
+        end = time.time()
+        tt = end-start
+        print("TOTAL TIME FOR DIR", tt)
         return results
 
     def writeResultsToCSV(self, results, output_file, append=False):
@@ -147,20 +150,38 @@ class SecLLM:
 #
 # Print the results
 #
-def printResults(result):
-    res = result.get('smells', [])
-    print(f"\nFile: {result['file']}\n")
-    print("=" * 40)
-    for r in res:
-        print(f"Smell: {r['smell']}")
-        print(f"Description: {r['description']}")
-        print(f"Lines: {', '.join(map(str, r['lines']))}")
-        print(f"Analysis:\n{r['analysis']}")
-        print("-" * 40)
-    print(f"Time: {result['time']}")
-    print(f"Input Tokens: {result['input']}")
-    print(f"Output Tokens: {result['output']}\n")
-    print("=" * 40)
+def printResults(result, directory=False):
+    if not directory:
+        res = result.get('smells', [])
+        print(f"\nFile: {result['file']}\n")
+        print("=" * 40)
+        for r in res:
+            print(f"Smell: {r['smell']}")
+            print(f"Description: {r['description']}")
+            print(f"Lines: {', '.join(map(str, r['lines']))}")
+            print(f"Analysis:\n{r['analysis']}")
+            print("-" * 40)
+        print(f"Time: {result['time']}")
+        print(f"Input Tokens: {result['input']}")
+        print(f"Output Tokens: {result['output']}\n")
+        print("=" * 40)
+    else:
+        for rx in result.keys():
+            r = result[rx]
+            print(r)
+            res = r.get('smells', [])
+            print(f"\nFile: {r['file']}\n")
+            print("=" * 40)
+            for r in res:
+                print(f"Smell: {r['smell']}")
+                print(f"Description: {r['description']}")
+                print(f"Lines: {', '.join(map(str, r['lines']))}")
+                print(f"Analysis:\n{r['analysis']}")
+                print("-" * 40)
+            print(f"Time: {r['time']}")
+            print(f"Input Tokens: {r['input']}")
+            print(f"Output Tokens: {r['output']}\n")
+            print("=" * 40)
 
 def main():
 
@@ -197,7 +218,7 @@ def main():
         if args.output:
             checker.writeResultsToCSV(result, args.output, append=args.append)
         else:
-            printResults(result)
+            printResults(result, True)
     else:
         print("Please provide either a file (-f) or a directory (-d) to process.")
 
