@@ -7,7 +7,7 @@ import time
 import argparse
 import csv
 import traceback
-
+from rich import print
 #
 # SecLLM main class. 
 #
@@ -168,7 +168,7 @@ def printResults(result, directory=False):
     else:
         for rx in result.keys():
             r = result[rx]
-            print(r)
+            #print(r)
             res = r.get('smells', [])
             print(f"\nFile: {r['file']}\n")
             print("=" * 40)
