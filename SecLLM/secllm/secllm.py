@@ -21,7 +21,7 @@ class SecLLM:
         self.tokens = []
     
     #
-    # Force SecLLM to detect only smell names
+    # Force SecLLM to detect only the provided smell names
     #
     def filterSmells(self, names):
         r = self.configurator.getSmellsByNames(names)
@@ -43,8 +43,8 @@ class SecLLM:
     #
     # Analyze the script for the given smell
     #
-    def checkSmell(self, name, script):
-        script_type, script, prompt = self.preprocessor.preprocess(name, script)
+    def checkSmell(self, name, scriptName, script):
+        script_type, script, prompt = self.preprocessor.preprocess(name, scriptName, script)
 
         #print(script_type,"\n",script, "\n",prompt )
 
@@ -73,7 +73,7 @@ class SecLLM:
         with ThreadPoolExecutor(max_workers=len(self.smells)) as executor:
             # Submit tasks for each smell to the executor
             futures = {
-                executor.submit(self.checkSmell, smell['name'], processed_script): smell['name']
+                executor.submit(self.checkSmell, smell['name'], file_path, processed_script): smell['name']
                 for smell in self.smells
             }
 
@@ -101,7 +101,9 @@ class SecLLM:
             outtk += t["output"]
         return {"file":file_path, "smells":results, "time":execution_time, "input":intk, "output":outtk}
 
-
+    #
+    # Process a full directory scan.
+    #
     def processDirectory(self, dir_path):
         """Processes all script files in a given directory concurrently."""
         results = {}
@@ -124,6 +126,9 @@ class SecLLM:
 
         return results
 
+    #
+    # Write the results to the provided csv file
+    #
     def writeResultsToCSV(self, results, output_file, append=False):
         """Writes the results to a CSV file."""
         mode = 'a' if append else 'w'

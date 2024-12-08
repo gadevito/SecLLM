@@ -66,6 +66,30 @@ class ScriptPreprocessor:
         else:
             return True
 
+    def heuristicScriptIdentification(self, filename):
+        iac_types = {
+            '.tf': 'terraform',
+            '.yml': 'ansible',
+            '.yaml': 'ansible',
+            '.json': 'awscloudformation',
+            '.template': 'awscloudformation',
+            '.pp': 'puppet',
+            '.rb': 'chef',
+        }
+        specific_files = {
+            'docker-compose.yml': 'dockercompose',
+            'docker-compose.yaml': 'dockercompose',
+            'Vagrantfile': 'vagrant',
+        }
+        if filename in specific_files:
+            return specific_files[filename]
+        
+        extension = '.' + filename.split('.')[-1] if '.' in filename else None
+
+        # Identify using extension
+        iac_type = iac_types.get(extension, '$unk$')
+
+        return iac_type
 
     #
     # Excludes lines from a text that contain one of the specified URLs considered safe
@@ -99,6 +123,13 @@ class ScriptPreprocessor:
     # Identify the script type using LLM
     #
     def identify_script_type(self, script):
+        return self.configurator.llm_call(self.configurator.system_prompt, 
+                                          self.configurator.scriptTypePrompt.format(script=script),
+                                          self.configurator.model)
+    #
+    # Use the configured LLM to identify the script type, given its content
+    #
+    def identify_script_type_(self, script):
         try:
             if self.configurator.isOpenAIModel():
                 msg = [{"role": "system", "content": self.configurator.system_prompt}]
@@ -138,13 +169,14 @@ class ScriptPreprocessor:
     #
     # Preprocess the script 'script' for the given smell 'name'
     #
-    def preprocess(self, smell_name, script):
+    def preprocess(self, smell_name, scriptName, script):
         smell = self.configurator.getSmellConfig(smell_name)
 
         prefilterRegEx = smell['prefilterRegEx']
 
         doNotAnalyze = smell['dontAnalyzeRegEx']
 
+        
         #doPrint = False
         if doNotAnalyze and not isinstance(doNotAnalyze,dict):
             if self.doNotAnalyze(script, doNotAnalyze):
@@ -173,7 +205,10 @@ class ScriptPreprocessor:
         if isinstance(prompt, dict):
             script_type = '$unk$'
             # in this case we have multiple prompts specialized in specific script types.
-            script_type = self.identify_script_type(script)
+            if self.configurator.heuristicScriptIdentification:
+                script_type = self.heuristicScriptIdentification(scriptName)
+            if script_type == '$unk$':
+                script_type = self.identify_script_type(script)
             if script_type.lower() in prompt:
                 prompt = prompt.get(script_type.lower())
             else:
@@ -181,7 +216,10 @@ class ScriptPreprocessor:
 
         if doNotAnalyze and isinstance(doNotAnalyze,dict):
             if script_type is None:
-                script_type = self.identify_script_type(script)
+                if self.configurator.heuristicScriptIdentification:
+                    script_type = self.heuristicScriptIdentification(scriptName)
+                if script_type == '$unk$':
+                    script_type = self.identify_script_type(script)
 
             if script_type.lower() in doNotAnalyze:
                 if self.doNotAnalyze(script, doNotAnalyze.get(script_type.lower())):

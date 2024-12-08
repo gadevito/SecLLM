@@ -3,6 +3,8 @@ import yaml
 import os
 from openai import OpenAI
 import anthropic
+import time
+import traceback
 
 #
 # Utility class to store the configuration
@@ -10,15 +12,34 @@ import anthropic
 class Config:
     def __init__(self):
         self._model = "gpt4-o"
+        self._url = None
         self._MAX_TOKENS = 8192
         self._system_prompt = ""
         self._answerKey = ""
         self._row_format = "#{i + 1} {line}"
         self._smells = []
-        self._client = None
         self._tokens = []
         self._scriptTypePrompt = ""
         self._retries = 1
+        self._heuristicScriptIdentification = False
+
+    # url Getter and setter 
+    @property
+    def url(self):
+        return self._url
+
+    @url.setter
+    def url(self, value):
+        self._url = value
+
+    # heuristicScriptIdentification Getter and setter 
+    @property
+    def heuristicScriptIdentification(self):
+        return self._heuristicScriptIdentification
+
+    @heuristicScriptIdentification.setter
+    def heuristicScriptIdentification(self, value):
+        self._heuristicScriptIdentification = value
 
     # scriptTypePrompt Getter and setter 
     @property
@@ -83,15 +104,6 @@ class Config:
     def smells(self, value):
         self._smells = value
 
-    # client Getter and setter 
-    @property
-    def client(self):
-        return self._client
-
-    @client.setter
-    def client(self, value):
-        self._client = value
-
     # tokens Getter and setter
     @property
     def tokens(self):
@@ -101,6 +113,7 @@ class Config:
     def tokens(self, value):
         self._tokens = value
 
+    # retries Getter and setter
     @property
     def retries(self):
         return self._retries
@@ -121,23 +134,91 @@ class Configurator:
         
         self.config.MAX_TOKENS = max_tokens
 
-        
+        self.config.heuristicScriptIdentification = False
         self.config.system_prompt= ""
         self.config.answerKey = ""
         self.config.row_format = "#{i + 1} {line}"
         self.config.smells = []
         self.load_smells_config(config)
 
-        self.config.client = OpenAI(
-                api_key=os.environ.get("OPENAI_API_KEY"),
-        )
+        self.clients = {}
 
-        self.config.clientAnthropic = anthropic.Anthropic(
-                # defaults to os.environ.get("ANTHROPIC_API_KEY")
-                api_key=os.getenv('ANTHROPIC_API_KEY'),
-        )
         self.config.tokens = []
     
+    #
+    # Return the LLM client given the model name
+    #
+    def _getClient(self, model:str):
+        client = None
+        openai_client = False
+        # Actually, the most open LLMs used OpenAI client, so the configuration is based on the provided
+        # url.
+        if model.startswith("gpt"):
+            openai_client = True
+            m = model + self.config.url if self.config.url else ""
+            if m not in self.clients:
+                if self.config.url:
+                    client = OpenAI(base_url=self.config.url, api_key="not-needed")
+                else:
+                    client = OpenAI(
+                        api_key=os.environ.get("OPENAI_API_KEY"),
+                    )
+                self.clients[m] = client
+            else:
+                client = self.clients.get(m)
+        else:
+            # Antrhopic
+            if model not in self.clients:
+                client = anthropic.Anthropic(
+                    # defaults to os.environ.get("ANTHROPIC_API_KEY")
+                    api_key=os.getenv('ANTHROPIC_API_KEY'),
+                )
+                self.clients[model] = client
+            else:
+                client = self.clients.get(model)
+        return openai_client, client
+    
+    #
+    # Perform the LLM call
+    #
+    def llm_call(self, system_prompt:str, user_prompt:str, model:str, tokens:list, backoff_factor=1.0) ->str:
+        openai_client, client = self._getClient(model)
+        for attempt in range(self.retries):
+            try:
+                cleaned_text = None
+                if openai_client:
+                    msg = [{"role": "system", "content": system_prompt}]
+                    msg.append({"role": "user", "content":  user_prompt})
+                    response = client.chat.completions.create(model=model,
+                                            messages=msg,
+                                            seed=123,
+                                            max_tokens=self.MAX_TOKENS,
+                                            temperature = 0)
+                    cleaned_text = response.choices[0].message.content
+                    tokens.append({"input":response.usage.prompt_tokens, "output":response.usage.completion_tokens})
+                else:
+                    msg =[]
+                    msg.append({"role": "user", "content":  user_prompt})
+                    response = client.messages.create(
+                                            model=model,
+                                            max_tokens=self.MAX_TOKENS,
+                                            system=system_prompt,
+                                            messages=msg,
+                                            temperature = 0
+                                        )
+                    cleaned_text = response.content[0].text
+                    tokens.append({"input":response.usage.input_tokens, "output":response.usage.output_tokens})
+                return cleaned_text
+            except Exception as e:
+                print("An error occurred during processing. Saving current progress...")
+                print(traceback.format_exc())
+                wait = backoff_factor * (2 ** attempt)
+                time.sleep(wait)
+        raise Exception(f"Max retries exceeded {model}")
+
+    #
+    # Load the smell configuration from the YAML file.
+    #
     def load_smells_config(self, config_file):
         # Open and read the YAML configuration file
         with open(config_file, 'r') as file:
@@ -154,6 +235,7 @@ class Configurator:
             self.config.row_format = c.get('rowFormat',"#{r} {line}")
             self.config.answerKey = c.get('answerKey',"ANSWER: ")
             self.config.retries = c.get('retries',4)
+            self.config.heuristicScriptIdentification = c.get('heuristicScriptIdentification', False)
             self.config.scriptTypePrompt = c.get('scriptTypePrompt','')
             self.config.system_prompt = c.get('systemPrompt',"You are an expert of IaC Security. Your are tasked to analyze the script I'll provide.")
         # Iterate through each smell entry in the YAML file and create a dictionary
@@ -176,6 +258,9 @@ class Configurator:
         #print(self.model, self.row_format)
         return self.config.smells
 
+    #
+    # Return the configured smells given their names
+    #
     def getSmellsByNames(self, names):
         r = []
         for s in self.config.smells:
@@ -184,12 +269,16 @@ class Configurator:
                 #break
         return r 
 
+    #
+    # Return the configured smell names
+    #
     def getSmellNames(self):
         r = []
         for s in self.config.smells:
             r.append(s['name'])
         return r
     
+    """
     def getSmellByName(self, name):
         r = []
         for s in self.config.smells:
@@ -197,16 +286,18 @@ class Configurator:
                 r.append(s)
                 break
         return r
+    """
 
+    #
+    # Return the smell config given its name
+    #
     def getSmellConfig(self, name):
         smell = next((smell for smell in self.config.smells if smell['name'].lower() == name.lower()), None)
         return smell
-
-
-    def isOpenAIModel(self):
-        return self.config.model.startswith("gpt")
     
-
+    """
+    Utility getters for properties
+    """
     @property
     def scriptTypePrompt(self):
         return self.config.scriptTypePrompt
@@ -241,9 +332,9 @@ class Configurator:
     def smells(self):
         return self.config.smells
 
-    @property
-    def client(self):
-        return self.config.client
+    #@property
+    #def client(self):
+    #    return self.config.client
 
     @property
     def tokens(self):
@@ -252,6 +343,14 @@ class Configurator:
     @property
     def retries(self):
         return self.config.retries
+    
+    @property
+    def heuristicScriptIdentification(self):
+        return self.config.heuristicScriptIdentification
+
+    @property
+    def url(self):
+        return self.config.url
     
 if __name__ == '__main__':
     c = Configurator("config.yaml")

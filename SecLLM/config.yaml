@@ -3,7 +3,9 @@
 #
 config:
   - model: "gpt-4o-mini"
+    #url:"http://localhost:1234/v1"
     rowFormat: "{r}. {line}"
+    heuristicScriptIdentification: True
     systemPrompt: |
       You are an expert of IaC Security. Your are tasked to analyze the script I'll provide.
     answerKey: "ANSWER: "
